@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
+  <title>Croissant Clicker</title>
+  <style>
+    :root {
+      --bg: #fff8ef;
+      --card: #ffffff;
+      --accent: #d97706;
+      --accent-dark: #92400e;
+      --text: #3f2a1f;
+      --muted: #7c6a5d;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top, #fff3e0 0%, var(--bg) 45%, #fffdf9 100%);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+
+    .game {
+      width: min(900px, 100%);
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1.2fr 1fr;
+    }
+
+    .panel {
+      border: 1px solid #f3e4cf;
+      border-radius: 16px;
+      padding: 18px;
+      background: #fffcf8;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(26px, 4vw, 38px);
+    }
+
+    .stats {
+      color: var(--muted);
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+
+    #croissantButton {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 26px 10px;
+      font-size: clamp(24px, 4vw, 34px);
+      font-weight: 700;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      cursor: pointer;
+      transition: transform .06s ease, filter .2s ease;
+    }
+
+    #croissantButton:hover { filter: brightness(1.05); }
+    #croissantButton:active { transform: translateY(2px) scale(0.99); }
+
+    .shop h2 { margin-top: 0; }
+
+    .upgrade {
+      width: 100%;
+      text-align: left;
+      border: 1px solid #ecd7bd;
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .upgrade:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .upgrade b { display: block; margin-bottom: 6px; }
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .event {
+      margin-top: 10px;
+      min-height: 24px;
+      font-weight: 600;
+      color: var(--accent-dark);
+    }
+
+    .rain-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 30;
+    }
+
+    .rain-timer {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 40;
+      background: rgba(20, 20, 20, 0.78);
+      color: #fff;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      display: none;
+    }
+
+    .version {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid #f2e4cf;
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+
+    .rain-croissant {
+      position: absolute;
+      top: -40px;
+      font-size: 30px;
+      animation: fall linear forwards;
+      opacity: .95;
+      filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.2));
+    }
+
+    @keyframes fall {
+      from { transform: translate3d(0, -12vh, 0) rotate(0); }
+      to { transform: translate3d(var(--drift, 0px), 115vh, 0) rotate(420deg); }
+    }
+
+    @media (max-width: 760px) {
+      .game { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+ 
+  <div class="game">
+    <section class="panel">
+      <h1>🥐 Croissant Clicker</h1>
+      <div class="stats">
+        <div><strong>Круассанов:</strong> <span id="count">0</span></div>
+        <div><strong>За клик:</strong> <span id="perClick">1</span></div>
+        <div><strong>В секунду:</strong> <span id="perSecond">0</span></div>
+      </div>
+      <button id="croissantButton" aria-label="Испечь круассан">🥐 Испечь круассан</button>
+      <p class="hint">Прогресс сохраняется автоматически в браузере.</p>
+      <p class="event" id="eventStatus"></p>
+    </section>
+ 
+    <aside class="panel shop">
+      <h2>Магазин улучшений</h2>
+      <button class="upgrade" id="buyOven">
+        <b>🔥 Духовка (+1/сек)</b>
+        Цена: <span id="ovenPrice">25</span> круассанов | Куплено: <span id="ovenOwned">0</span>
+      </button>
+
+      <button class="upgrade" id="buyBakery">
+        <b>🏪 Пекарня (+5/сек)</b>
+        Цена: <span id="bakeryPrice">120</span> круассанов | Куплено: <span id="bakeryOwned">0</span>
+      </button>
+
+      <button class="upgrade" id="buyButter">
+        <b>🧈 Масло (+1 за клик)</b>
+        Цена: <span id="butterPrice">60</span> круассанов | Куплено: <span id="butterOwned">0</span>
+      </button>
+
+      <button class="upgrade" id="buyRestaurant">
+        <b>🍽️ Ресторан (+20/сек)</b>
+        Цена: <span id="restaurantPrice">480</span> круассанов | Куплено: <span id="restaurantOwned">0</span>
+      </button>
+    </aside>
+  </div>
+
+  <div class="rain-timer" id="rainTimer" aria-live="polite"></div>
+  <div class="rain-layer" id="rainLayer" aria-hidden="true"></div>
+  <div class="version">Croissant Clicker v1.3.1</div>
+  <script src="script.js"></script>
