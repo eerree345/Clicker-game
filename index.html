@@ -78,14 +78,14 @@
     .plate-croissant:nth-child(6) { bottom: 20%; right: 33%; --rot: 12deg; }
 
     .game {
-      width: min(900px, 100%);
+      width: min(1100px, 100%);
       background: var(--card);
       border-radius: 20px;
       box-shadow: var(--shadow);
       padding: 24px;
       display: grid;
       gap: 20px;
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: 1.2fr 1fr 0.95fr;
       position: relative;
       z-index: 1;
     }
@@ -125,6 +125,7 @@
     #croissantButton:active { transform: translateY(2px) scale(0.99); }
 
     .shop h2 { margin-top: 0; }
+    .achievements h2 { margin-top: 0; }
 
     .upgrade {
       width: 100%;
@@ -143,6 +144,24 @@
     }
 
     .upgrade b { display: block; margin-bottom: 6px; }
+
+    .achievement {
+      border: 1px solid #ecd7bd;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+      margin-bottom: 10px;
+    }
+
+    .achievement b {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .achievement small {
+      color: var(--muted);
+      font-size: 13px;
+    }
     .hint {
       margin: 0;
       color: var(--muted);
@@ -283,6 +302,30 @@
         <b>🍽️ Ресторан (+20/сек)</b>
         Цена: <span id="restaurantPrice">480</span> круассанов | Куплено: <span id="restaurantOwned">0</span>
       </button>
+    </aside>
+
+    <aside class="panel achievements">
+      <h2>Достижения</h2>
+
+      <div class="achievement">
+        <b>🔥 Жар Сердца Пекаря — ур. <span id="ovenAchLevel">0</span></b>
+        <small>Духовка: <span id="ovenAchProgress">0/10</span></small>
+      </div>
+
+      <div class="achievement">
+        <b>🏪 Империя Рассветного Теста — ур. <span id="bakeryAchLevel">0</span></b>
+        <small>Пекарня: <span id="bakeryAchProgress">0/10</span></small>
+      </div>
+
+      <div class="achievement">
+        <b>🧈 Легенда Золотого Масла — ур. <span id="butterAchLevel">0</span></b>
+        <small>Масло: <span id="butterAchProgress">0/10</span></small>
+      </div>
+
+      <div class="achievement">
+        <b>🍽️ Корона Круассанного Двора — ур. <span id="restaurantAchLevel">0</span></b>
+        <small>Ресторан: <span id="restaurantAchProgress">0/10</span></small>
+      </div>
     </aside>
   </div>
 

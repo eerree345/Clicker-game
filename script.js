@@ -36,6 +36,14 @@ const refs = {
   bakeryOwned: document.getElementById('bakeryOwned'),
   butterOwned: document.getElementById('butterOwned'),
   restaurantOwned: document.getElementById('restaurantOwned'),
+  ovenAchLevel: document.getElementById('ovenAchLevel'),
+  bakeryAchLevel: document.getElementById('bakeryAchLevel'),
+  butterAchLevel: document.getElementById('butterAchLevel'),
+  restaurantAchLevel: document.getElementById('restaurantAchLevel'),
+  ovenAchProgress: document.getElementById('ovenAchProgress'),
+  bakeryAchProgress: document.getElementById('bakeryAchProgress'),
+  butterAchProgress: document.getElementById('butterAchProgress'),
+  restaurantAchProgress: document.getElementById('restaurantAchProgress'),
   eventStatus: document.getElementById('eventStatus'),
   rainLayer: document.getElementById('rainLayer'),
   rainTimer: document.getElementById('rainTimer'),
@@ -99,11 +107,27 @@ function refresh() {
   refs.bakeryOwned.textContent = state.bakeries;
   refs.butterOwned.textContent = state.butter;
   refs.restaurantOwned.textContent = state.restaurants;
+  refreshAchievements();
 
   refs.buyOven.disabled = state.croissants < getCurrentPrice('oven');
   refs.buyBakery.disabled = state.croissants < getCurrentPrice('bakery');
   refs.buyButter.disabled = state.croissants < getCurrentPrice('butter');
   refs.buyRestaurant.disabled = state.croissants < getCurrentPrice('restaurant');
+}
+
+function refreshAchievements() {
+  updateAchievement(refs.ovenAchLevel, refs.ovenAchProgress, state.ovens);
+  updateAchievement(refs.bakeryAchLevel, refs.bakeryAchProgress, state.bakeries);
+  updateAchievement(refs.butterAchLevel, refs.butterAchProgress, state.butter);
+  updateAchievement(refs.restaurantAchLevel, refs.restaurantAchProgress, state.restaurants);
+}
+
+function updateAchievement(levelNode, progressNode, owned) {
+  if (!levelNode || !progressNode) return;
+  const level = Math.floor(owned / 10);
+  const progress = owned % 10;
+  levelNode.textContent = `${level}`;
+  progressNode.textContent = `${progress}/10`;
 }
 
 function format(value) {
