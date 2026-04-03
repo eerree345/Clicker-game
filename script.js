@@ -41,8 +41,9 @@ const refs = {
   rainTimer: document.getElementById('rainTimer'),
 };
 
-refs.button.addEventListener('click', () => {
+refs.button.addEventListener('click', (event) => {
   state.croissants += state.perClick;
+  showClickGain(event);
   refresh();
 });
 
@@ -238,4 +239,19 @@ function hideRainTimer() {
   if (!refs.rainTimer) return;
   refs.rainTimer.style.display = 'none';
   refs.rainTimer.textContent = '';
+}
+
+function showClickGain(event) {
+  const gain = state.perClick;
+  const node = document.createElement('span');
+  node.className = 'click-gain';
+  node.textContent = `+${format(gain)}`;
+
+  const x = event?.clientX ?? window.innerWidth / 2;
+  const y = event?.clientY ?? window.innerHeight / 2;
+  node.style.left = `${x}px`;
+  node.style.top = `${y}px`;
+
+  document.body.appendChild(node);
+  setTimeout(() => node.remove(), 900);
 }
