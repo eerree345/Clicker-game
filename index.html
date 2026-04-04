@@ -316,6 +316,79 @@
       color: var(--accent-dark);
     }
 
+    .talent-open-btn {
+      width: 100%;
+      margin-top: 10px;
+      border: 1px solid #caa47f;
+      background: linear-gradient(180deg, #fff5e8, #ffe8ca);
+      color: #6e3d16;
+      border-radius: 10px;
+      padding: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .talent-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(30, 20, 15, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .talent-modal.open { display: flex; }
+
+    .talent-card {
+      width: min(760px, 100%);
+      max-height: 86vh;
+      overflow: auto;
+      background: rgba(255, 250, 242, 0.96);
+      border: 1px solid #e7cfb1;
+      border-radius: 16px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+      padding: 16px;
+    }
+
+    .talent-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .talent-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .talent-node {
+      border: 1px solid #e5cdb0;
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+    }
+
+    .talent-node button {
+      width: 100%;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid #d2b089;
+      background: #fff2de;
+      padding: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .talent-node button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
     .rain-layer {
       position: fixed;
       inset: 0;
@@ -491,6 +564,7 @@
         <div class="roulette-result" id="rouletteResult"></div>
         <p class="roulette-note">Испытай свою удачу</p>
       </div>
+      <button class="talent-open-btn" id="openTalentTree">🌿 Дерево талантов</button>
       <p class="event" id="eventStatus"></p>
     </section>
  
@@ -597,7 +671,46 @@
   <div class="belt-wrap" aria-label="Лента круассанов">
     <div class="belt-track" id="beltTrack"></div>
   </div>
-  <div class="version">Croissant Clicker v1.6.2</div>
+  <div class="talent-modal" id="talentModal" role="dialog" aria-modal="true" aria-label="Дерево талантов">
+    <div class="talent-card">
+      <div class="talent-head">
+        <h2> Дерево талантов</h2>
+        <button id="closeTalentTree">✕</button>
+      </div>
+      <p><strong>Рецепты:</strong> <span id="recipesCount">0</span></p>
+
+      <div id="talentLocked">
+        <p>Открытие дерева талантов: <strong>10 000</strong> круассанов (единоразово).</p>
+        <button id="unlockTalentTree">Открыть дерево</button>
+      </div>
+
+      <div id="talentUnlocked" style="display:none;">
+        <div class="talent-grid">
+          <div class="talent-node">
+            <b>База мастерства</b>
+            <div>Уровень: <span id="talentCoreLevel">0</span></div>
+            <small>+1% ко всем доходам за уровень</small>
+            <button id="upgradeTalentCore">Улучшить (1 рецепт)</button>
+          </div>
+
+          <div class="talent-node">
+            <b>Ветка: Пассив</b>
+            <div>Уровень: <span id="talentPassiveLevel">0</span></div>
+            <small>+3% к пассивному доходу</small>
+            <button id="upgradeTalentPassive">Улучшить (2 рецепта)</button>
+          </div>
+
+          <div class="talent-node">
+            <b>Ветка: Клик</b>
+            <div>Уровень: <span id="talentClickLevel">0</span></div>
+            <small>+10% к доходу клика</small>
+            <button id="upgradeTalentClick">Улучшить (1 рецепт)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="version">Croissant Clicker v1.7</div>
   <script src="script.js"></script>
 </body>
 </html>

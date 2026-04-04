@@ -14,6 +14,13 @@ const BRANCH_CONFIG = {
 
 const defaultState = {
   croissants: 0,
+  recipes: 1,
+  talentUnlocked: false,
+  talents: {
+    core: 0,
+    passive: 0,
+    click: 0,
+  },
   perClick: 1,
   ovens: 0,
   bakeries: 0,
@@ -55,6 +62,19 @@ const refs = {
   perClick: document.getElementById('perClick'),
   perSecond: document.getElementById('perSecond'),
   button: document.getElementById('croissantButton'),
+  openTalentTree: document.getElementById('openTalentTree'),
+  talentModal: document.getElementById('talentModal'),
+  closeTalentTree: document.getElementById('closeTalentTree'),
+  unlockTalentTree: document.getElementById('unlockTalentTree'),
+  recipesCount: document.getElementById('recipesCount'),
+  talentLocked: document.getElementById('talentLocked'),
+  talentUnlocked: document.getElementById('talentUnlocked'),
+  talentCoreLevel: document.getElementById('talentCoreLevel'),
+  talentPassiveLevel: document.getElementById('talentPassiveLevel'),
+  talentClickLevel: document.getElementById('talentClickLevel'),
+  upgradeTalentCore: document.getElementById('upgradeTalentCore'),
+  upgradeTalentPassive: document.getElementById('upgradeTalentPassive'),
+  upgradeTalentClick: document.getElementById('upgradeTalentClick'),
   rouletteCost: document.getElementById('rouletteCost'),
   spinRoulette: document.getElementById('spinRoulette'),
   rouletteResult: document.getElementById('rouletteResult'),
@@ -147,6 +167,12 @@ BRANCH_KEYS.forEach((branch) => {
   branchUI[branch].buy.addEventListener('click', () => buyUpgrade(branch));
   branchUI[branch].prestigeBtn.addEventListener('click', () => prestigeBranch(branch));
 });
+refs.openTalentTree.addEventListener('click', openTalentTree);
+refs.closeTalentTree.addEventListener('click', closeTalentTree);
+refs.unlockTalentTree.addEventListener('click', unlockTalentTree);
+refs.upgradeTalentCore.addEventListener('click', () => upgradeTalent('core'));
+refs.upgradeTalentPassive.addEventListener('click', () => upgradeTalent('passive'));
+refs.upgradeTalentClick.addEventListener('click', () => upgradeTalent('click'));
 refs.spinRoulette.addEventListener('click', spinRoulette);
 
 setInterval(() => {
@@ -286,6 +312,58 @@ function applyRouletteOutcome(outcome) {
   refs.rouletteResult.textContent = outcome.message;
 }
 
+function openTalentTree() {
+  refs.talentModal.classList.add('open');
+  refreshTalentUI();
+}
+
+function closeTalentTree() {
+  refs.talentModal.classList.remove('open');
+}
+
+function unlockTalentTree() {
+  const unlockCost = 10_000;
+  if (state.talentUnlocked) return;
+  if (state.croissants < unlockCost) return;
+  state.croissants -= unlockCost;
+  state.talentUnlocked = true;
+  refresh();
+}
+
+function upgradeTalent(type) {
+  if (!state.talentUnlocked) return;
+  if ((type === 'passive' || type === 'click') && state.talents.core < 3) return;
+
+  const cost = type === 'passive' ? 2 : 1;
+  if (state.recipes < cost) return;
+
+  state.recipes -= cost;
+  state.talents[type] += 1;
+  refresh();
+}
+
+function getTalentMultipliers() {
+  const all = 1 + state.talents.core * 0.01;
+  const passive = 1 + state.talents.passive * 0.03;
+  const click = 1 + state.talents.click * 0.10;
+  return { all, passive, click };
+}
+
+function refreshTalentUI() {
+  refs.recipesCount.textContent = format(state.recipes);
+  refs.talentLocked.style.display = state.talentUnlocked ? 'none' : 'block';
+  refs.talentUnlocked.style.display = state.talentUnlocked ? 'block' : 'none';
+
+  refs.unlockTalentTree.disabled = state.talentUnlocked || state.croissants < 10_000;
+  refs.talentCoreLevel.textContent = state.talents.core;
+  refs.talentPassiveLevel.textContent = state.talents.passive;
+  refs.talentClickLevel.textContent = state.talents.click;
+
+  refs.upgradeTalentCore.disabled = !state.talentUnlocked || state.recipes < 1;
+  refs.upgradeTalentPassive.disabled = !state.talentUnlocked || state.talents.core < 3 || state.recipes < 2;
+  refs.upgradeTalentClick.disabled = !state.talentUnlocked || state.talents.core < 3 || state.recipes < 1;
+}
+
 function prestigeBranch(type) {
   if (!canPrestige(type)) return;
   const { ownedKey } = BRANCH_CONFIG[type];
@@ -312,17 +390,33 @@ function branchMultiplier(type) {
   return 1 + (state.prestige[type] || 0) * 0.03;
 }
 
+function canPrestige(type) {
+  return ownedCount(BRANCH_CONFIG[type].ownedKey) >= 10;
+}
+
+function ownedCount(key) {
+  const value = Number(state[key]);
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.floor(value));
+}
+
+function branchMultiplier(type) {
+  return 1 + (state.prestige[type] || 0) * 0.03;
+}
+
 function perSecond() {
+  const talent = getTalentMultipliers();
   return BRANCH_KEYS.reduce((sum, branch) => {
     const { ownedKey, perSecond: base } = BRANCH_CONFIG[branch];
     if (!base) return sum;
-    return sum + state[ownedKey] * base * branchMultiplier(branch);
+    return sum + state[ownedKey] * base * branchMultiplier(branch) * talent.all * talent.passive;
   }, 0);
 }
 
 function perClickValue() {
   const butterPrestigeBonus = state.butter * (branchMultiplier('butter') - 1);
-  return state.perClick + butterPrestigeBonus;
+  const talent = getTalentMultipliers();
+  return (state.perClick + butterPrestigeBonus) * talent.all * talent.click;
 }
 
 function refresh() {
@@ -347,6 +441,8 @@ function refresh() {
     branchUI[branch].prestigeBtn.disabled = !canPrestige(branch);
   });
   refs.spinRoulette.disabled = rouletteSpinning || state.croissants < rouletteCost();
+  refs.openTalentTree.textContent = `🌿 Дерево талантов (${format(state.recipes)})`;
+  refreshTalentUI();
 }
 
 function refreshAchievements() {
@@ -398,6 +494,10 @@ function loadState() {
         ...defaultState.prestige,
         ...(parsed.prestige || {}),
       },
+      talents: {
+        ...defaultState.talents,
+        ...(parsed.talents || {}),
+      },
     };
     return sanitizeState(merged);
   } catch {
@@ -408,6 +508,13 @@ function loadState() {
 function sanitizeState(inputState) {
   const next = { ...inputState };
   next.croissants = sanitizeNonNegative(next.croissants);
+  next.recipes = sanitizeNonNegative(next.recipes);
+  next.talentUnlocked = Boolean(next.talentUnlocked);
+  next.talents = {
+    core: sanitizeNonNegative(next.talents?.core),
+    passive: sanitizeNonNegative(next.talents?.passive),
+    click: sanitizeNonNegative(next.talents?.click),
+  };
   next.perClick = Math.max(1, sanitizeNonNegative(next.perClick));
 
   next.ovens = sanitizeNonNegative(next.ovens);
