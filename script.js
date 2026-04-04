@@ -24,6 +24,8 @@ const defaultState = {
 
 let state = loadState();
 let rainEventActive = false;
+let rouletteSpinning = false;
+let rouletteRotation = 0;
 
 const refs = {
   count: document.getElementById('count'),
@@ -33,6 +35,7 @@ const refs = {
   rouletteCost: document.getElementById('rouletteCost'),
   spinRoulette: document.getElementById('spinRoulette'),
   rouletteResult: document.getElementById('rouletteResult'),
+  rouletteWheel: document.getElementById('rouletteWheel'),
   buyOven: document.getElementById('buyOven'),
   buyBakery: document.getElementById('buyBakery'),
   buyButter: document.getElementById('buyButter'),
@@ -119,36 +122,17 @@ function grantBranchLevel(type) {
 }
 
 function spinRoulette() {
+  if (rouletteSpinning) return;
   const cost = rouletteCost();
   if (state.croissants < cost) return;
 
   state.croissants -= cost;
-  const roll = Math.random();
-
-  if (roll < 0.01) {
-    const branch = randomBranch();
-    state.prestige[branch] += 1;
-    refs.rouletteResult.textContent = `✨ Престиж +1: ${branchLabel(branch)}`;
+  const outcome = pickRouletteOutcome();
+  const segment = pickSegmentForOutcome(outcome.kind);
+  startRouletteSpin(segment, () => {
+    applyRouletteOutcome(outcome);
     refresh();
-    return;
-  }
-
-  if (roll < 0.11) {
-    refs.rouletteResult.textContent = 'УВЫ';
-    refresh();
-    return;
-  }
-
-  if (roll < 0.41) {
-    refs.rouletteResult.textContent = '🔁 Повторная прокрутка!';
-    refresh();
-    return;
-  }
-
-  const wonBranch = randomBranch();
-  grantBranchLevel(wonBranch);
-  refs.rouletteResult.textContent = `🎉 +1 уровень: ${branchLabel(wonBranch)}`;
-  refresh();
+  });
 }
 
 function rouletteCost() {
@@ -171,6 +155,72 @@ function branchLabel(type) {
   if (type === 'bakery') return 'Пекарня';
   if (type === 'butter') return 'Масло';
   return 'Ресторан';
+}
+
+function pickRouletteOutcome() {
+  const roll = Math.random();
+
+  if (roll < 0.01) {
+    const branch = randomBranch();
+    return {
+      kind: 'prestige',
+      apply: () => { state.prestige[branch] += 1; },
+      message: `✨ Престиж +1: ${branchLabel(branch)}`,
+    };
+  }
+
+  if (roll < 0.11) {
+    return { kind: 'lose', apply: () => {}, message: 'УВЫ' };
+  }
+
+  if (roll < 0.41) {
+    return { kind: 'reroll', apply: () => {}, message: '🔁 Повторная прокрутка!' };
+  }
+
+  const branch = randomBranch();
+  return {
+    kind: branch,
+    apply: () => { grantBranchLevel(branch); },
+    message: `🎉 +1 уровень: ${branchLabel(branch)}`,
+  };
+}
+
+function pickSegmentForOutcome(kind) {
+  if (kind === 'prestige') return 7;
+  if (kind === 'lose') return 4;
+  if (kind === 'reroll') return Math.random() < 0.5 ? 2 : 6;
+  if (kind === 'oven') return 3;
+  if (kind === 'bakery') return 0;
+  if (kind === 'butter') return 1;
+  return 5;
+}
+
+function startRouletteSpin(segmentIndex, onDone) {
+  rouletteSpinning = true;
+  const spinDuration = randomInt(7000, 12000);
+  const segmentAngle = 360 / 8;
+  const segmentCenter = segmentIndex * segmentAngle + segmentAngle / 2;
+  const extraSpins = randomInt(9, 13) * 360;
+  const target = extraSpins + (360 - segmentCenter);
+  rouletteRotation += target;
+
+  if (refs.rouletteWheel) {
+    refs.rouletteWheel.style.transition = `transform ${spinDuration}ms cubic-bezier(0.15, 0.82, 0.22, 1)`;
+    refs.rouletteWheel.style.transform = `rotate(${rouletteRotation}deg)`;
+  }
+
+  refs.rouletteResult.textContent = '🎡 Крутим...';
+  refresh();
+
+  setTimeout(() => {
+    rouletteSpinning = false;
+    onDone();
+  }, spinDuration + 50);
+}
+
+function applyRouletteOutcome(outcome) {
+  outcome.apply();
+  refs.rouletteResult.textContent = outcome.message;
 }
 
 function prestigeBranch(type) {
@@ -236,7 +286,7 @@ function refresh() {
   refs.buyBakery.disabled = state.croissants < getCurrentPrice('bakery');
   refs.buyButter.disabled = state.croissants < getCurrentPrice('butter');
   refs.buyRestaurant.disabled = state.croissants < getCurrentPrice('restaurant');
-  refs.spinRoulette.disabled = state.croissants < rouletteCost();
+  refs.spinRoulette.disabled = rouletteSpinning || state.croissants < rouletteCost();
   refs.prestigeOven.disabled = !canPrestige('oven');
   refs.prestigeBakery.disabled = !canPrestige('bakery');
   refs.prestigeButter.disabled = !canPrestige('butter');
