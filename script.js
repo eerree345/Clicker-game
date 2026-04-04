@@ -305,6 +305,72 @@ function prestigeBranch(type) {
 
   state.prestige[type] += 1;
   refresh();
+
+  setTimeout(() => {
+    rouletteSpinning = false;
+    onDone();
+  }, spinDuration + 50);
+}
+
+function applyRouletteOutcome(outcome) {
+  outcome.apply();
+  refs.rouletteResult.textContent = outcome.message;
+}
+
+function prestigeBranch(type) {
+  if (!canPrestige(type)) return;
+
+  if (type === 'oven') state.ovens -= 10;
+  if (type === 'bakery') state.bakeries -= 10;
+  if (type === 'butter') {
+    state.butter -= 10;
+    state.perClick = Math.max(1, state.perClick - 10);
+  }
+  if (type === 'restaurant') state.restaurants -= 10;
+  if (type === 'cart') state.carts -= 10;
+  if (type === 'chef') state.chefs -= 10;
+  if (type === 'factory') state.factories -= 10;
+  if (type === 'airport') state.airports -= 10;
+
+  state.prestige[type] += 1;
+  refresh();
+}
+
+function canPrestige(type) {
+  if (type === 'oven') return state.ovens >= 10;
+  if (type === 'bakery') return state.bakeries >= 10;
+  if (type === 'butter') return state.butter >= 10;
+  if (type === 'restaurant') return state.restaurants >= 10;
+  if (type === 'cart') return state.carts >= 10;
+  if (type === 'chef') return state.chefs >= 10;
+  if (type === 'factory') return state.factories >= 10;
+  return state.airports >= 10;
+}
+
+function branchMultiplier(type) {
+  return 1 + (state.prestige[type] || 0) * 0.03;
+}
+
+function canPrestige(type) {
+  if (type === 'oven') return state.ovens >= 10;
+  if (type === 'bakery') return state.bakeries >= 10;
+  if (type === 'butter') return state.butter >= 10;
+  return state.restaurants >= 10;
+}
+
+function branchMultiplier(type) {
+  return 1 + (state.prestige[type] || 0) * 0.03;
+}
+
+function canPrestige(type) {
+  if (type === 'oven') return state.ovens >= 10;
+  if (type === 'bakery') return state.bakeries >= 10;
+  if (type === 'butter') return state.butter >= 10;
+  return state.restaurants >= 10;
+}
+
+function branchMultiplier(type) {
+  return 1 + (state.prestige[type] || 0) * 0.03;
 }
 
 function canPrestige(type) {
