@@ -85,9 +85,15 @@
       padding: 24px;
       display: grid;
       gap: 20px;
-      grid-template-columns: 1.2fr 1fr 0.95fr;
+      grid-template-columns: 1.2fr 1fr;
       position: relative;
       z-index: 1;
+    }
+
+    .side-column {
+      display: grid;
+      gap: 20px;
+      align-content: start;
     }
 
     .panel {
@@ -347,80 +353,58 @@
       <p class="event" id="eventStatus"></p>
     </section>
  
-    <aside class="panel shop">
-      <h2>Магазин улучшений</h2>
-      <button class="upgrade" id="buyOven">
-        <b>🔥 Духовка (+1/сек)</b>
-        Цена: <span id="ovenPrice">25</span> круассанов | Куплено: <span id="ovenOwned">0</span> | Престиж: <span id="ovenPrestige">0</span>
-      </button>
-      <button class="prestige-btn" id="prestigeOven">Сбросить 10 духовок → +3% к духовкам</button>
+    <div class="side-column">
+      <aside class="panel shop">
+        <h2>Магазин улучшений</h2>
+        <button class="upgrade" id="buyOven">
+          <b>🔥 Духовка (+1/сек)</b>
+          Цена: <span id="ovenPrice">25</span> круассанов | Куплено: <span id="ovenOwned">0</span> | Престиж: <span id="ovenPrestige">0</span>
+        </button>
+        <button class="prestige-btn" id="prestigeOven">Сбросить 10 духовок → +3% к духовкам</button>
 
-      <button class="upgrade" id="buyBakery">
-        <b>🏪 Пекарня (+5/сек)</b>
-        Цена: <span id="bakeryPrice">120</span> круассанов | Куплено: <span id="bakeryOwned">0</span> | Престиж: <span id="bakeryPrestige">0</span>
-      </button>
-      <button class="prestige-btn" id="prestigeBakery">Сбросить 10 пекарен → +3% к пекарням</button>
+        <button class="upgrade" id="buyBakery">
+          <b>🏪 Пекарня (+5/сек)</b>
+          Цена: <span id="bakeryPrice">120</span> круассанов | Куплено: <span id="bakeryOwned">0</span> | Престиж: <span id="bakeryPrestige">0</span>
+        </button>
+        <button class="prestige-btn" id="prestigeBakery">Сбросить 10 пекарен → +3% к пекарням</button>
 
-      <button class="upgrade" id="buyButter">
-        <b>🧈 Масло (+1 за клик)</b>
-        Цена: <span id="butterPrice">60</span> круассанов | Куплено: <span id="butterOwned">0</span> | Престиж: <span id="butterPrestige">0</span>
-      </button>
-      <button class="prestige-btn" id="prestigeButter">Сбросить 10 масла → +3% к маслу</button>
+        <button class="upgrade" id="buyButter">
+          <b>🧈 Масло (+1 за клик)</b>
+          Цена: <span id="butterPrice">60</span> круассанов | Куплено: <span id="butterOwned">0</span> | Престиж: <span id="butterPrestige">0</span>
+        </button>
+        <button class="prestige-btn" id="prestigeButter">Сбросить 10 масла → +3% к маслу</button>
 
-      <button class="upgrade" id="buyRestaurant">
-        <b>🍽️ Ресторан (+20/сек)</b>
-        Цена: <span id="restaurantPrice">480</span> круассанов | Куплено: <span id="restaurantOwned">0</span> | Престиж: <span id="restaurantPrestige">0</span>
-      </button>
-      <button class="prestige-btn" id="prestigeRestaurant">Сбросить 10 ресторанов → +3% к ресторанам</button>
-    </aside>
+        <button class="upgrade" id="buyRestaurant">
+          <b>🍽️ Ресторан (+20/сек)</b>
+          Цена: <span id="restaurantPrice">480</span> круассанов | Куплено: <span id="restaurantOwned">0</span> | Престиж: <span id="restaurantPrestige">0</span>
+        </button>
+        <button class="prestige-btn" id="prestigeRestaurant">Сбросить 10 ресторанов → +3% к ресторанам</button>
+      </aside>
 
-    <aside class="panel achievements">
-      <h2>Достижения</h2>
+      <aside class="panel achievements">
+        <h2>Достижения</h2>
 
-      <div class="achievement">
-        <b>🔥 Жар Сердца Пекаря — ур. <span id="ovenAchLevel">0</span></b>
-        <small>Духовка: <span id="ovenAchProgress">0/10</span></small>
-      </div>
+        <div class="achievement">
+          <b>🔥 Жар Сердца Пекаря — ур. <span id="ovenAchLevel">0</span></b>
+          <small>Духовка: <span id="ovenAchProgress">0/10</span></small>
+        </div>
 
-      <div class="achievement">
-        <b>🏪 Империя Рассветного Теста — ур. <span id="bakeryAchLevel">0</span></b>
-        <small>Пекарня: <span id="bakeryAchProgress">0/10</span></small>
-      </div>
+        <div class="achievement">
+          <b>🏪 Империя Рассветного Теста — ур. <span id="bakeryAchLevel">0</span></b>
+          <small>Пекарня: <span id="bakeryAchProgress">0/10</span></small>
+        </div>
 
-      <div class="achievement">
-        <b>🧈 Легенда Золотого Масла — ур. <span id="butterAchLevel">0</span></b>
-        <small>Масло: <span id="butterAchProgress">0/10</span></small>
-      </div>
+        <div class="achievement">
+          <b>🧈 Легенда Золотого Масла — ур. <span id="butterAchLevel">0</span></b>
+          <small>Масло: <span id="butterAchProgress">0/10</span></small>
+        </div>
 
-      <div class="achievement">
-        <b>🍽️ Корона Круассанного Двора — ур. <span id="restaurantAchLevel">0</span></b>
-        <small>Ресторан: <span id="restaurantAchProgress">0/10</span></small>
-      </div>
-    </aside>
-
-    <aside class="panel achievements">
-      <h2>Достижения</h2>
-
-      <div class="achievement">
-        <b>🔥 Жар Сердца Пекаря — ур. <span id="ovenAchLevel">0</span></b>
-        <small>Духовка: <span id="ovenAchProgress">0/10</span></small>
-      </div>
-
-      <div class="achievement">
-        <b>🏪 Империя Рассветного Теста — ур. <span id="bakeryAchLevel">0</span></b>
-        <small>Пекарня: <span id="bakeryAchProgress">0/10</span></small>
-      </div>
-
-      <div class="achievement">
-        <b>🧈 Легенда Золотого Масла — ур. <span id="butterAchLevel">0</span></b>
-        <small>Масло: <span id="butterAchProgress">0/10</span></small>
-      </div>
-
-      <div class="achievement">
-        <b>🍽️ Корона Круассанного Двора — ур. <span id="restaurantAchLevel">0</span></b>
-        <small>Ресторан: <span id="restaurantAchProgress">0/10</span></small>
-      </div>
-    </aside>
+        <div class="achievement">
+          <b>🍽️ Корона Круассанного Двора — ур. <span id="restaurantAchLevel">0</span></b>
+          <small>Ресторан: <span id="restaurantAchProgress">0/10</span></small>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <div class="rain-timer" id="rainTimer" aria-live="polite"></div>
@@ -428,7 +412,7 @@
   <div class="belt-wrap" aria-label="Лента круассанов">
     <div class="belt-track" id="beltTrack"></div>
   </div>
-  <div class="version">Croissant Clicker v1.5</div>
+  <div class="version">Croissant Clicker v1.5.1</div>
   <script src="script.js"></script>
 </body>
 </html>

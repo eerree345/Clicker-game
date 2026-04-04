@@ -24,7 +24,6 @@ const defaultState = {
 
 let state = loadState();
 let rainEventActive = false;
-let rainDiscountBranch = null;
 
 const refs = {
   count: document.getElementById('count'),
@@ -66,7 +65,7 @@ const refs = {
 };
 
 refs.button.addEventListener('click', (event) => {
-  const gain = perClickValue();
+  const gain = perClickValue() * (rainEventActive ? 5 : 1);
   state.croissants += gain;
   showClickGain(event, gain);
   refresh();
@@ -194,21 +193,6 @@ function updateAchievement(levelNode, progressNode, owned) {
   progressNode.textContent = `${progress}/10`;
 }
 
-function refreshAchievements() {
-  updateAchievement(refs.ovenAchLevel, refs.ovenAchProgress, state.ovens);
-  updateAchievement(refs.bakeryAchLevel, refs.bakeryAchProgress, state.bakeries);
-  updateAchievement(refs.butterAchLevel, refs.butterAchProgress, state.butter);
-  updateAchievement(refs.restaurantAchLevel, refs.restaurantAchProgress, state.restaurants);
-}
-
-function updateAchievement(levelNode, progressNode, owned) {
-  if (!levelNode || !progressNode) return;
-  const level = Math.floor(owned / 10);
-  const progress = owned % 10;
-  levelNode.textContent = `${level}`;
-  progressNode.textContent = `${progress}/10`;
-}
-
 function format(value) {
   return new Intl.NumberFormat('ru-RU').format(Math.floor(value));
 }
@@ -216,6 +200,10 @@ function format(value) {
 function formatStat(value) {
   if (Number.isInteger(value)) return `${value}`;
   return value.toFixed(2);
+}
+
+function formatGain(value) {
+  return value.toFixed(1);
 }
 
 function saveState() {
@@ -259,30 +247,21 @@ function scheduleCroissantRain() {
 function startCroissantRain() {
   const rainDurationMs = randomInt(30_000, 45_000);
   const spawnEveryMs = 180;
-  const incomeEveryMs = 600;
-  const bonusPerTick = Math.max(5, state.perClick * 3 + perSecond());
-  const rainEndsAt = Date.now() + rainDurationMs;
   rainEventActive = true;
-  rainDiscountBranch = pickRandomBranch();
+  const rainEndsAt = Date.now() + rainDurationMs;
 
-  refs.eventStatus.textContent = `🌧️ Дождь из круассанов! Скидка 20% на ${branchName(rainDiscountBranch)}.`;
+  refs.eventStatus.textContent = '🌧️ Дождь из круассанов! Бонус: x5 за клик.';
   showRainTimer(rainEndsAt);
   refresh();
 
   const spawnTimer = setInterval(spawnFallingCroissant, spawnEveryMs);
-  const incomeTimer = setInterval(() => {
-    state.croissants += bonusPerTick;
-    refresh();
-  }, incomeEveryMs);
   const countdownTimer = setInterval(() => updateRainTimer(rainEndsAt), 250);
 
   setTimeout(() => {
     clearInterval(spawnTimer);
-    clearInterval(incomeTimer);
     clearInterval(countdownTimer);
     refs.eventStatus.textContent = '';
     rainEventActive = false;
-    rainDiscountBranch = null;
     hideRainTimer();
     refresh();
   }, rainDurationMs);
@@ -306,32 +285,12 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function pickRandomBranch() {
-  const branches = ['oven', 'bakery', 'butter', 'restaurant'];
-  return branches[randomInt(0, branches.length - 1)];
-}
-
 function getCurrentPrice(type) {
-  const basePrice = state.prices[type];
-  if (rainEventActive && rainDiscountBranch === type) {
-    return Math.ceil(basePrice * 0.8);
-  }
-  return basePrice;
+  return state.prices[type];
 }
 
 function getPriceLabel(type) {
-  const currentPrice = getCurrentPrice(type);
-  if (rainEventActive && rainDiscountBranch === type) {
-    return `${currentPrice} (−20%)`;
-  }
-  return `${currentPrice}`;
-}
-
-function branchName(type) {
-  if (type === 'oven') return 'Духовку';
-  if (type === 'bakery') return 'Пекарню';
-  if (type === 'restaurant') return 'Ресторан';
-  return 'Масло';
+  return `${getCurrentPrice(type)}`;
 }
 
 function showRainTimer(rainEndsAt) {
@@ -356,7 +315,7 @@ function hideRainTimer() {
 function showClickGain(event, gain = state.perClick) {
   const node = document.createElement('span');
   node.className = 'click-gain';
-  node.textContent = `+${formatStat(gain)}`;
+  node.textContent = `+${formatGain(gain)}`;
 
   const x = event?.clientX ?? window.innerWidth / 2;
   const y = event?.clientY ?? window.innerHeight / 2;
