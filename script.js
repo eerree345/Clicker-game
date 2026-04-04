@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'croissant_clicker_save_v1';
+const BELT_VISIBLE_ITEMS = 15;
 
 const defaultState = {
   croissants: 0,
@@ -36,13 +37,23 @@ const refs = {
   bakeryOwned: document.getElementById('bakeryOwned'),
   butterOwned: document.getElementById('butterOwned'),
   restaurantOwned: document.getElementById('restaurantOwned'),
+  ovenAchLevel: document.getElementById('ovenAchLevel'),
+  bakeryAchLevel: document.getElementById('bakeryAchLevel'),
+  butterAchLevel: document.getElementById('butterAchLevel'),
+  restaurantAchLevel: document.getElementById('restaurantAchLevel'),
+  ovenAchProgress: document.getElementById('ovenAchProgress'),
+  bakeryAchProgress: document.getElementById('bakeryAchProgress'),
+  butterAchProgress: document.getElementById('butterAchProgress'),
+  restaurantAchProgress: document.getElementById('restaurantAchProgress'),
   eventStatus: document.getElementById('eventStatus'),
   rainLayer: document.getElementById('rainLayer'),
   rainTimer: document.getElementById('rainTimer'),
+  beltTrack: document.getElementById('beltTrack'),
 };
 
-refs.button.addEventListener('click', () => {
+refs.button.addEventListener('click', (event) => {
   state.croissants += state.perClick;
+  showClickGain(event, state.perClick);
   refresh();
 });
 
@@ -59,6 +70,7 @@ setInterval(() => {
 setInterval(saveState, 3000);
 window.addEventListener('beforeunload', saveState);
 scheduleCroissantRain();
+initDishBelt();
 
 refresh();
 
@@ -98,11 +110,27 @@ function refresh() {
   refs.bakeryOwned.textContent = state.bakeries;
   refs.butterOwned.textContent = state.butter;
   refs.restaurantOwned.textContent = state.restaurants;
+  refreshAchievements();
 
   refs.buyOven.disabled = state.croissants < getCurrentPrice('oven');
   refs.buyBakery.disabled = state.croissants < getCurrentPrice('bakery');
   refs.buyButter.disabled = state.croissants < getCurrentPrice('butter');
   refs.buyRestaurant.disabled = state.croissants < getCurrentPrice('restaurant');
+}
+
+function refreshAchievements() {
+  updateAchievement(refs.ovenAchLevel, refs.ovenAchProgress, state.ovens);
+  updateAchievement(refs.bakeryAchLevel, refs.bakeryAchProgress, state.bakeries);
+  updateAchievement(refs.butterAchLevel, refs.butterAchProgress, state.butter);
+  updateAchievement(refs.restaurantAchLevel, refs.restaurantAchProgress, state.restaurants);
+}
+
+function updateAchievement(levelNode, progressNode, owned) {
+  if (!levelNode || !progressNode) return;
+  const level = Math.floor(owned / 10);
+  const progress = owned % 10;
+  levelNode.textContent = `${level}`;
+  progressNode.textContent = `${progress}/10`;
 }
 
 function format(value) {
@@ -238,4 +266,61 @@ function hideRainTimer() {
   if (!refs.rainTimer) return;
   refs.rainTimer.style.display = 'none';
   refs.rainTimer.textContent = '';
+}
+
+function showClickGain(event, gain = state.perClick) {
+  const node = document.createElement('span');
+  node.className = 'click-gain';
+  node.textContent = `+${format(gain)}`;
+
+  const x = event?.clientX ?? window.innerWidth / 2;
+  const y = event?.clientY ?? window.innerHeight / 2;
+  node.style.left = `${x}px`;
+  node.style.top = `${y}px`;
+
+  document.body.appendChild(node);
+  setTimeout(() => node.remove(), 900);
+}
+
+function initDishBelt() {
+  if (!refs.beltTrack) return;
+
+  const baseItems = [];
+  for (let i = 0; i < BELT_VISIBLE_ITEMS; i += 1) {
+    const node = createDishNode(randomDishType());
+    baseItems.push(node);
+    refs.beltTrack.appendChild(node);
+  }
+
+  baseItems.forEach((node) => {
+    refs.beltTrack.appendChild(node.cloneNode(true));
+  });
+
+  refs.beltTrack.addEventListener('click', onBeltClick);
+}
+
+function randomDishType() {
+  return Math.random() < 0.15 ? 'pizza' : 'croissant';
+}
+
+function createDishNode(type) {
+  const node = document.createElement('span');
+  node.className = 'belt-item';
+  node.setAttribute('aria-hidden', 'true');
+  node.dataset.kind = type;
+  node.textContent = type === 'pizza' ? '🍕' : '🥐';
+  if (type === 'pizza') {
+    node.classList.add('is-pizza');
+  }
+  return node;
+}
+
+function onBeltClick(event) {
+  const dishNode = event.target.closest('.belt-item');
+  if (!dishNode || dishNode.dataset.kind !== 'pizza') return;
+
+  state.croissants += 1000;
+  showClickGain(event, 1000);
+  dishNode.replaceWith(createDishNode('croissant'));
+  refresh();
 }
