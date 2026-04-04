@@ -8,11 +8,29 @@ const defaultState = {
   bakeries: 0,
   butter: 0,
   restaurants: 0,
+  carts: 0,
+  chefs: 0,
+  factories: 0,
+  airports: 0,
   prices: {
     oven: 25,
     bakery: 120,
     butter: 60,
     restaurant: 480,
+    cart: 70,
+    chef: 260,
+    factory: 1200,
+    airport: 4200,
+  },
+  prestige: {
+    oven: 0,
+    bakery: 0,
+    butter: 0,
+    restaurant: 0,
+    cart: 0,
+    chef: 0,
+    factory: 0,
+    airport: 0,
   },
   prestige: {
     oven: 0,
@@ -40,30 +58,58 @@ const refs = {
   buyBakery: document.getElementById('buyBakery'),
   buyButter: document.getElementById('buyButter'),
   buyRestaurant: document.getElementById('buyRestaurant'),
+  buyCart: document.getElementById('buyCart'),
+  buyChef: document.getElementById('buyChef'),
+  buyFactory: document.getElementById('buyFactory'),
+  buyAirport: document.getElementById('buyAirport'),
   ovenPrice: document.getElementById('ovenPrice'),
   bakeryPrice: document.getElementById('bakeryPrice'),
   butterPrice: document.getElementById('butterPrice'),
   restaurantPrice: document.getElementById('restaurantPrice'),
+  cartPrice: document.getElementById('cartPrice'),
+  chefPrice: document.getElementById('chefPrice'),
+  factoryPrice: document.getElementById('factoryPrice'),
+  airportPrice: document.getElementById('airportPrice'),
   ovenOwned: document.getElementById('ovenOwned'),
   bakeryOwned: document.getElementById('bakeryOwned'),
   butterOwned: document.getElementById('butterOwned'),
   restaurantOwned: document.getElementById('restaurantOwned'),
+  cartOwned: document.getElementById('cartOwned'),
+  chefOwned: document.getElementById('chefOwned'),
+  factoryOwned: document.getElementById('factoryOwned'),
+  airportOwned: document.getElementById('airportOwned'),
   ovenPrestige: document.getElementById('ovenPrestige'),
   bakeryPrestige: document.getElementById('bakeryPrestige'),
   butterPrestige: document.getElementById('butterPrestige'),
   restaurantPrestige: document.getElementById('restaurantPrestige'),
+  cartPrestige: document.getElementById('cartPrestige'),
+  chefPrestige: document.getElementById('chefPrestige'),
+  factoryPrestige: document.getElementById('factoryPrestige'),
+  airportPrestige: document.getElementById('airportPrestige'),
   prestigeOven: document.getElementById('prestigeOven'),
   prestigeBakery: document.getElementById('prestigeBakery'),
   prestigeButter: document.getElementById('prestigeButter'),
   prestigeRestaurant: document.getElementById('prestigeRestaurant'),
+  prestigeCart: document.getElementById('prestigeCart'),
+  prestigeChef: document.getElementById('prestigeChef'),
+  prestigeFactory: document.getElementById('prestigeFactory'),
+  prestigeAirport: document.getElementById('prestigeAirport'),
   ovenAchLevel: document.getElementById('ovenAchLevel'),
   bakeryAchLevel: document.getElementById('bakeryAchLevel'),
   butterAchLevel: document.getElementById('butterAchLevel'),
   restaurantAchLevel: document.getElementById('restaurantAchLevel'),
+  cartAchLevel: document.getElementById('cartAchLevel'),
+  chefAchLevel: document.getElementById('chefAchLevel'),
+  factoryAchLevel: document.getElementById('factoryAchLevel'),
+  airportAchLevel: document.getElementById('airportAchLevel'),
   ovenAchProgress: document.getElementById('ovenAchProgress'),
   bakeryAchProgress: document.getElementById('bakeryAchProgress'),
   butterAchProgress: document.getElementById('butterAchProgress'),
   restaurantAchProgress: document.getElementById('restaurantAchProgress'),
+  cartAchProgress: document.getElementById('cartAchProgress'),
+  chefAchProgress: document.getElementById('chefAchProgress'),
+  factoryAchProgress: document.getElementById('factoryAchProgress'),
+  airportAchProgress: document.getElementById('airportAchProgress'),
   eventStatus: document.getElementById('eventStatus'),
   rainLayer: document.getElementById('rainLayer'),
   rainTimer: document.getElementById('rainTimer'),
@@ -81,11 +127,19 @@ refs.buyOven.addEventListener('click', () => buyUpgrade('oven'));
 refs.buyBakery.addEventListener('click', () => buyUpgrade('bakery'));
 refs.buyButter.addEventListener('click', () => buyUpgrade('butter'));
 refs.buyRestaurant.addEventListener('click', () => buyUpgrade('restaurant'));
+refs.buyCart.addEventListener('click', () => buyUpgrade('cart'));
+refs.buyChef.addEventListener('click', () => buyUpgrade('chef'));
+refs.buyFactory.addEventListener('click', () => buyUpgrade('factory'));
+refs.buyAirport.addEventListener('click', () => buyUpgrade('airport'));
 refs.spinRoulette.addEventListener('click', spinRoulette);
 refs.prestigeOven.addEventListener('click', () => prestigeBranch('oven'));
 refs.prestigeBakery.addEventListener('click', () => prestigeBranch('bakery'));
 refs.prestigeButter.addEventListener('click', () => prestigeBranch('butter'));
 refs.prestigeRestaurant.addEventListener('click', () => prestigeBranch('restaurant'));
+refs.prestigeCart.addEventListener('click', () => prestigeBranch('cart'));
+refs.prestigeChef.addEventListener('click', () => prestigeBranch('chef'));
+refs.prestigeFactory.addEventListener('click', () => prestigeBranch('factory'));
+refs.prestigeAirport.addEventListener('click', () => prestigeBranch('airport'));
 
 setInterval(() => {
   state.croissants += perSecond();
@@ -119,6 +173,10 @@ function grantBranchLevel(type) {
     state.perClick += 1;
   }
   if (type === 'restaurant') state.restaurants += 1;
+  if (type === 'cart') state.carts += 1;
+  if (type === 'chef') state.chefs += 1;
+  if (type === 'factory') state.factories += 1;
+  if (type === 'airport') state.airports += 1;
 }
 
 function spinRoulette() {
@@ -141,12 +199,16 @@ function rouletteCost() {
     + getCurrentPrice('bakery')
     + getCurrentPrice('butter')
     + getCurrentPrice('restaurant')
-  ) / 4;
+    + getCurrentPrice('cart')
+    + getCurrentPrice('chef')
+    + getCurrentPrice('factory')
+    + getCurrentPrice('airport')
+  ) / 8;
   return Math.ceil(average);
 }
 
 function randomBranch() {
-  const branches = ['oven', 'bakery', 'butter', 'restaurant'];
+  const branches = ['oven', 'bakery', 'butter', 'restaurant', 'cart', 'chef', 'factory', 'airport'];
   return branches[randomInt(0, branches.length - 1)];
 }
 
@@ -154,7 +216,11 @@ function branchLabel(type) {
   if (type === 'oven') return 'Духовка';
   if (type === 'bakery') return 'Пекарня';
   if (type === 'butter') return 'Масло';
-  return 'Ресторан';
+  if (type === 'restaurant') return 'Ресторан';
+  if (type === 'cart') return 'Тележка';
+  if (type === 'chef') return 'Шеф-пекарь';
+  if (type === 'factory') return 'Фабрика';
+  return 'Аэропекарня';
 }
 
 function pickRouletteOutcome() {
@@ -192,6 +258,10 @@ function pickSegmentForOutcome(kind) {
   if (kind === 'oven') return 3;
   if (kind === 'bakery') return 0;
   if (kind === 'butter') return 1;
+  if (kind === 'cart') return 0;
+  if (kind === 'chef') return 1;
+  if (kind === 'factory') return 3;
+  if (kind === 'airport') return 5;
   return 5;
 }
 
@@ -233,9 +303,28 @@ function prestigeBranch(type) {
     state.perClick = Math.max(1, state.perClick - 10);
   }
   if (type === 'restaurant') state.restaurants -= 10;
+  if (type === 'cart') state.carts -= 10;
+  if (type === 'chef') state.chefs -= 10;
+  if (type === 'factory') state.factories -= 10;
+  if (type === 'airport') state.airports -= 10;
 
   state.prestige[type] += 1;
   refresh();
+}
+
+function canPrestige(type) {
+  if (type === 'oven') return state.ovens >= 10;
+  if (type === 'bakery') return state.bakeries >= 10;
+  if (type === 'butter') return state.butter >= 10;
+  if (type === 'restaurant') return state.restaurants >= 10;
+  if (type === 'cart') return state.carts >= 10;
+  if (type === 'chef') return state.chefs >= 10;
+  if (type === 'factory') return state.factories >= 10;
+  return state.airports >= 10;
+}
+
+function branchMultiplier(type) {
+  return 1 + (state.prestige[type] || 0) * 0.03;
 }
 
 function canPrestige(type) {
@@ -264,7 +353,11 @@ function perSecond() {
   const ovensIncome = state.ovens * 1 * branchMultiplier('oven');
   const bakeryIncome = state.bakeries * 5 * branchMultiplier('bakery');
   const restaurantIncome = state.restaurants * 20 * branchMultiplier('restaurant');
-  return ovensIncome + bakeryIncome + restaurantIncome;
+  const cartIncome = state.carts * 2 * branchMultiplier('cart');
+  const chefIncome = state.chefs * 12 * branchMultiplier('chef');
+  const factoryIncome = state.factories * 45 * branchMultiplier('factory');
+  const airportIncome = state.airports * 150 * branchMultiplier('airport');
+  return ovensIncome + bakeryIncome + restaurantIncome + cartIncome + chefIncome + factoryIncome + airportIncome;
 }
 
 function perClickValue() {
@@ -281,27 +374,47 @@ function refresh() {
   refs.bakeryPrice.textContent = getPriceLabel('bakery');
   refs.butterPrice.textContent = getPriceLabel('butter');
   refs.restaurantPrice.textContent = getPriceLabel('restaurant');
+  refs.cartPrice.textContent = getPriceLabel('cart');
+  refs.chefPrice.textContent = getPriceLabel('chef');
+  refs.factoryPrice.textContent = getPriceLabel('factory');
+  refs.airportPrice.textContent = getPriceLabel('airport');
   refs.rouletteCost.textContent = format(rouletteCost());
 
   refs.ovenOwned.textContent = state.ovens;
   refs.bakeryOwned.textContent = state.bakeries;
   refs.butterOwned.textContent = state.butter;
   refs.restaurantOwned.textContent = state.restaurants;
+  refs.cartOwned.textContent = state.carts;
+  refs.chefOwned.textContent = state.chefs;
+  refs.factoryOwned.textContent = state.factories;
+  refs.airportOwned.textContent = state.airports;
   refs.ovenPrestige.textContent = state.prestige.oven;
   refs.bakeryPrestige.textContent = state.prestige.bakery;
   refs.butterPrestige.textContent = state.prestige.butter;
   refs.restaurantPrestige.textContent = state.prestige.restaurant;
+  refs.cartPrestige.textContent = state.prestige.cart;
+  refs.chefPrestige.textContent = state.prestige.chef;
+  refs.factoryPrestige.textContent = state.prestige.factory;
+  refs.airportPrestige.textContent = state.prestige.airport;
   refreshAchievements();
 
   refs.buyOven.disabled = state.croissants < getCurrentPrice('oven');
   refs.buyBakery.disabled = state.croissants < getCurrentPrice('bakery');
   refs.buyButter.disabled = state.croissants < getCurrentPrice('butter');
   refs.buyRestaurant.disabled = state.croissants < getCurrentPrice('restaurant');
+  refs.buyCart.disabled = state.croissants < getCurrentPrice('cart');
+  refs.buyChef.disabled = state.croissants < getCurrentPrice('chef');
+  refs.buyFactory.disabled = state.croissants < getCurrentPrice('factory');
+  refs.buyAirport.disabled = state.croissants < getCurrentPrice('airport');
   refs.spinRoulette.disabled = rouletteSpinning || state.croissants < rouletteCost();
   refs.prestigeOven.disabled = !canPrestige('oven');
   refs.prestigeBakery.disabled = !canPrestige('bakery');
   refs.prestigeButter.disabled = !canPrestige('butter');
   refs.prestigeRestaurant.disabled = !canPrestige('restaurant');
+  refs.prestigeCart.disabled = !canPrestige('cart');
+  refs.prestigeChef.disabled = !canPrestige('chef');
+  refs.prestigeFactory.disabled = !canPrestige('factory');
+  refs.prestigeAirport.disabled = !canPrestige('airport');
 }
 
 function refreshAchievements() {
@@ -309,6 +422,10 @@ function refreshAchievements() {
   updateAchievement(refs.bakeryAchLevel, refs.bakeryAchProgress, state.bakeries);
   updateAchievement(refs.butterAchLevel, refs.butterAchProgress, state.butter);
   updateAchievement(refs.restaurantAchLevel, refs.restaurantAchProgress, state.restaurants);
+  updateAchievement(refs.cartAchLevel, refs.cartAchProgress, state.carts);
+  updateAchievement(refs.chefAchLevel, refs.chefAchProgress, state.chefs);
+  updateAchievement(refs.factoryAchLevel, refs.factoryAchProgress, state.factories);
+  updateAchievement(refs.airportAchLevel, refs.airportAchProgress, state.airports);
 }
 
 function updateAchievement(levelNode, progressNode, owned) {
