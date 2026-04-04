@@ -22,22 +22,72 @@
       margin: 0;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       color: var(--text);
-      background: radial-gradient(circle at top, #fff3e0 0%, var(--bg) 45%, #fffdf9 100%);
+      background:
+        linear-gradient(120deg,
+          #ff595e 0%,
+          #ffca3a 16%,
+          #8ac926 33%,
+          #1982c4 50%,
+          #6a4c93 66%,
+          #ff7eb6 83%,
+          #ff595e 100%);
+      background-size: 260% 260%;
+      animation: rainbowFlow 22s ease-in-out infinite;
       min-height: 100vh;
       display: grid;
       place-items: center;
       padding: 20px;
     }
 
+    .bg-plate {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      display: grid;
+      place-items: center;
+      opacity: 0.12;
+      overflow: hidden;
+    }
+
+    .plate {
+      width: min(72vmin, 560px);
+      aspect-ratio: 1 / 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, #fff 0 43%, #f6ede3 44% 54%, #ead7c1 55% 56%, transparent 57%),
+        radial-gradient(circle at center, rgba(255, 255, 255, 0.7) 0 24%, transparent 65%);
+      box-shadow: 0 18px 48px rgba(70, 40, 20, 0.2);
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .plate-croissant {
+      position: absolute;
+      font-size: clamp(24px, 3.2vmin, 38px);
+      transform: rotate(var(--rot, 0deg));
+      filter: saturate(1.2) drop-shadow(0 4px 2px rgba(50, 30, 15, 0.22));
+    }
+
+    .plate-croissant:nth-child(1) { top: 18%; left: 31%; --rot: -20deg; }
+    .plate-croissant:nth-child(2) { top: 26%; right: 27%; --rot: 16deg; }
+    .plate-croissant:nth-child(3) { top: 44%; left: 18%; --rot: -38deg; }
+    .plate-croissant:nth-child(4) { top: 43%; right: 18%; --rot: 35deg; }
+    .plate-croissant:nth-child(5) { bottom: 20%; left: 34%; --rot: -10deg; }
+    .plate-croissant:nth-child(6) { bottom: 20%; right: 33%; --rot: 12deg; }
+
     .game {
-      width: min(900px, 100%);
+      width: min(1100px, 100%);
       background: var(--card);
       border-radius: 20px;
       box-shadow: var(--shadow);
       padding: 24px;
       display: grid;
       gap: 20px;
-      grid-template-columns: 1.2fr 1fr;
+      grid-template-columns: 1.2fr 1fr 0.95fr;
+      position: relative;
+      z-index: 1;
     }
 
     .panel {
@@ -75,6 +125,7 @@
     #croissantButton:active { transform: translateY(2px) scale(0.99); }
 
     .shop h2 { margin-top: 0; }
+    .achievements h2 { margin-top: 0; }
 
     .upgrade {
       width: 100%;
@@ -93,6 +144,24 @@
     }
 
     .upgrade b { display: block; margin-bottom: 6px; }
+
+    .achievement {
+      border: 1px solid #ecd7bd;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+      margin-bottom: 10px;
+    }
+
+    .achievement b {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .achievement small {
+      color: var(--muted);
+      font-size: 13px;
+    }
     .hint {
       margin: 0;
       color: var(--muted);
@@ -152,6 +221,31 @@
       filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.2));
     }
 
+    .click-gain {
+      position: fixed;
+      color: var(--accent-dark);
+      font-weight: 800;
+      font-size: clamp(16px, 2vw, 24px);
+      pointer-events: none;
+      z-index: 60;
+      animation: clickGainUp .85s ease-out forwards;
+      text-shadow: 0 2px 8px rgba(255, 255, 255, 0.9);
+    }
+
+    @keyframes clickGainUp {
+      from { opacity: 0; transform: translate(-50%, -20%); }
+      20% { opacity: 1; }
+      to { opacity: 0; transform: translate(-50%, -165%); }
+    }
+
+    @keyframes rainbowFlow {
+      0% { background-position: 0% 50%; }
+      25% { background-position: 50% 0%; }
+      50% { background-position: 100% 50%; }
+      75% { background-position: 50% 100%; }
+      100% { background-position: 0% 50%; }
+    }
+
     @keyframes fall {
       from { transform: translate3d(0, -12vh, 0) rotate(0); }
       to { transform: translate3d(var(--drift, 0px), 115vh, 0) rotate(420deg); }
@@ -163,7 +257,17 @@
   </style>
 </head>
 <body>
- 
+  <div class="bg-plate" aria-hidden="true">
+    <div class="plate">
+      <span class="plate-croissant">🥐</span>
+      <span class="plate-croissant">🥮</span>
+      <span class="plate-croissant">🥐</span>
+      <span class="plate-croissant">🧈</span>
+      <span class="plate-croissant">🥐</span>
+      <span class="plate-croissant">🥯</span>
+    </div>
+  </div>
+
   <div class="game">
     <section class="panel">
       <h1>🥐 Croissant Clicker</h1>
@@ -199,9 +303,35 @@
         Цена: <span id="restaurantPrice">480</span> круассанов | Куплено: <span id="restaurantOwned">0</span>
       </button>
     </aside>
+
+    <aside class="panel achievements">
+      <h2>Достижения</h2>
+
+      <div class="achievement">
+        <b>🔥 Жар Сердца Пекаря — ур. <span id="ovenAchLevel">0</span></b>
+        <small>Духовка: <span id="ovenAchProgress">0/10</span></small>
+      </div>
+
+      <div class="achievement">
+        <b>🏪 Империя Рассветного Теста — ур. <span id="bakeryAchLevel">0</span></b>
+        <small>Пекарня: <span id="bakeryAchProgress">0/10</span></small>
+      </div>
+
+      <div class="achievement">
+        <b>🧈 Легенда Золотого Масла — ур. <span id="butterAchLevel">0</span></b>
+        <small>Масло: <span id="butterAchProgress">0/10</span></small>
+      </div>
+
+      <div class="achievement">
+        <b>🍽️ Корона Круассанного Двора — ур. <span id="restaurantAchLevel">0</span></b>
+        <small>Ресторан: <span id="restaurantAchProgress">0/10</span></small>
+      </div>
+    </aside>
   </div>
 
   <div class="rain-timer" id="rainTimer" aria-live="polite"></div>
   <div class="rain-layer" id="rainLayer" aria-hidden="true"></div>
-  <div class="version">Croissant Clicker v1.3.1</div>
+  <div class="version">Croissant Clicker v1.3.3</div>
   <script src="script.js"></script>
+</body>
+</html>
