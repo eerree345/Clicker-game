@@ -24,12 +24,18 @@ const defaultState = {
 
 let state = loadState();
 let rainEventActive = false;
+let rouletteSpinning = false;
+let rouletteRotation = 0;
 
 const refs = {
   count: document.getElementById('count'),
   perClick: document.getElementById('perClick'),
   perSecond: document.getElementById('perSecond'),
   button: document.getElementById('croissantButton'),
+  rouletteCost: document.getElementById('rouletteCost'),
+  spinRoulette: document.getElementById('spinRoulette'),
+  rouletteResult: document.getElementById('rouletteResult'),
+  rouletteWheel: document.getElementById('rouletteWheel'),
   buyOven: document.getElementById('buyOven'),
   buyBakery: document.getElementById('buyBakery'),
   buyButter: document.getElementById('buyButter'),
@@ -75,6 +81,7 @@ refs.buyOven.addEventListener('click', () => buyUpgrade('oven'));
 refs.buyBakery.addEventListener('click', () => buyUpgrade('bakery'));
 refs.buyButter.addEventListener('click', () => buyUpgrade('butter'));
 refs.buyRestaurant.addEventListener('click', () => buyUpgrade('restaurant'));
+refs.spinRoulette.addEventListener('click', spinRoulette);
 refs.prestigeOven.addEventListener('click', () => prestigeBranch('oven'));
 refs.prestigeBakery.addEventListener('click', () => prestigeBranch('bakery'));
 refs.prestigeButter.addEventListener('click', () => prestigeBranch('butter'));
@@ -97,6 +104,12 @@ function buyUpgrade(type) {
   if (state.croissants < price) return;
 
   state.croissants -= price;
+  grantBranchLevel(type);
+
+  refresh();
+}
+
+function grantBranchLevel(type) {
   state.prices[type] = Math.ceil(state.prices[type] * 1.2);
 
   if (type === 'oven') state.ovens += 1;
@@ -106,8 +119,134 @@ function buyUpgrade(type) {
     state.perClick += 1;
   }
   if (type === 'restaurant') state.restaurants += 1;
+}
 
+function spinRoulette() {
+  if (rouletteSpinning) return;
+  const cost = rouletteCost();
+  if (state.croissants < cost) return;
+
+  state.croissants -= cost;
+  const outcome = pickRouletteOutcome();
+  const segment = pickSegmentForOutcome(outcome.kind);
+  startRouletteSpin(segment, () => {
+    applyRouletteOutcome(outcome);
+    refresh();
+  });
+}
+
+function rouletteCost() {
+  const average = (
+    getCurrentPrice('oven')
+    + getCurrentPrice('bakery')
+    + getCurrentPrice('butter')
+    + getCurrentPrice('restaurant')
+  ) / 4;
+  return Math.ceil(average);
+}
+
+function randomBranch() {
+  const branches = ['oven', 'bakery', 'butter', 'restaurant'];
+  return branches[randomInt(0, branches.length - 1)];
+}
+
+function branchLabel(type) {
+  if (type === 'oven') return 'Духовка';
+  if (type === 'bakery') return 'Пекарня';
+  if (type === 'butter') return 'Масло';
+  return 'Ресторан';
+}
+
+function pickRouletteOutcome() {
+  const roll = Math.random();
+
+  if (roll < 0.01) {
+    const branch = randomBranch();
+    return {
+      kind: 'prestige',
+      apply: () => { state.prestige[branch] += 1; },
+      message: `✨ Престиж +1: ${branchLabel(branch)}`,
+    };
+  }
+
+  if (roll < 0.11) {
+    return { kind: 'lose', apply: () => {}, message: 'УВЫ' };
+  }
+
+  if (roll < 0.41) {
+    return { kind: 'reroll', apply: () => {}, message: '🔁 Повторная прокрутка!' };
+  }
+
+  const branch = randomBranch();
+  return {
+    kind: branch,
+    apply: () => { grantBranchLevel(branch); },
+    message: `🎉 +1 уровень: ${branchLabel(branch)}`,
+  };
+}
+
+function pickSegmentForOutcome(kind) {
+  if (kind === 'prestige') return 7;
+  if (kind === 'lose') return 4;
+  if (kind === 'reroll') return Math.random() < 0.5 ? 2 : 6;
+  if (kind === 'oven') return 3;
+  if (kind === 'bakery') return 0;
+  if (kind === 'butter') return 1;
+  return 5;
+}
+
+function startRouletteSpin(segmentIndex, onDone) {
+  rouletteSpinning = true;
+  const spinDuration = randomInt(7000, 12000);
+  const segmentAngle = 360 / 8;
+  const segmentCenter = segmentIndex * segmentAngle + segmentAngle / 2;
+  const extraSpins = randomInt(9, 13) * 360;
+  const target = extraSpins + (360 - segmentCenter);
+  rouletteRotation += target;
+
+  if (refs.rouletteWheel) {
+    refs.rouletteWheel.style.transition = `transform ${spinDuration}ms cubic-bezier(0.15, 0.82, 0.22, 1)`;
+    refs.rouletteWheel.style.transform = `rotate(${rouletteRotation}deg)`;
+  }
+
+  refs.rouletteResult.textContent = '🎡 Крутим...';
   refresh();
+
+  setTimeout(() => {
+    rouletteSpinning = false;
+    onDone();
+  }, spinDuration + 50);
+}
+
+function applyRouletteOutcome(outcome) {
+  outcome.apply();
+  refs.rouletteResult.textContent = outcome.message;
+}
+
+function prestigeBranch(type) {
+  if (!canPrestige(type)) return;
+
+  if (type === 'oven') state.ovens -= 10;
+  if (type === 'bakery') state.bakeries -= 10;
+  if (type === 'butter') {
+    state.butter -= 10;
+    state.perClick = Math.max(1, state.perClick - 10);
+  }
+  if (type === 'restaurant') state.restaurants -= 10;
+
+  state.prestige[type] += 1;
+  refresh();
+}
+
+function canPrestige(type) {
+  if (type === 'oven') return state.ovens >= 10;
+  if (type === 'bakery') return state.bakeries >= 10;
+  if (type === 'butter') return state.butter >= 10;
+  return state.restaurants >= 10;
+}
+
+function branchMultiplier(type) {
+  return 1 + (state.prestige[type] || 0) * 0.03;
 }
 
 function prestigeBranch(type) {
@@ -157,6 +296,7 @@ function refresh() {
   refs.bakeryPrice.textContent = getPriceLabel('bakery');
   refs.butterPrice.textContent = getPriceLabel('butter');
   refs.restaurantPrice.textContent = getPriceLabel('restaurant');
+  refs.rouletteCost.textContent = format(rouletteCost());
 
   refs.ovenOwned.textContent = state.ovens;
   refs.bakeryOwned.textContent = state.bakeries;
@@ -172,6 +312,7 @@ function refresh() {
   refs.buyBakery.disabled = state.croissants < getCurrentPrice('bakery');
   refs.buyButter.disabled = state.croissants < getCurrentPrice('butter');
   refs.buyRestaurant.disabled = state.croissants < getCurrentPrice('restaurant');
+  refs.spinRoulette.disabled = rouletteSpinning || state.croissants < rouletteCost();
   refs.prestigeOven.disabled = !canPrestige('oven');
   refs.prestigeBakery.disabled = !canPrestige('bakery');
   refs.prestigeButter.disabled = !canPrestige('butter');

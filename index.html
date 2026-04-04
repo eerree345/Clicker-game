@@ -190,6 +190,106 @@
       font-size: 14px;
     }
 
+    .roulette {
+      margin-top: 12px;
+      border: 1px solid #efdac0;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fffaf3;
+    }
+
+    .roulette-wheel-wrap {
+      position: relative;
+      width: min(100%, 230px);
+      aspect-ratio: 1 / 1;
+      margin: 8px auto 10px;
+    }
+
+    .roulette-pointer {
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 18px solid #7a2f00;
+      z-index: 4;
+    }
+
+    .roulette-wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 4px solid #ddb992;
+      box-shadow: inset 0 0 0 5px rgba(255, 245, 229, 0.7), 0 6px 14px rgba(120, 70, 30, 0.25);
+      position: relative;
+      transform: rotate(0deg);
+      background: conic-gradient(
+        #ffd9a8 0deg 45deg,
+        #ffc78d 45deg 90deg,
+        #ffe5bc 90deg 135deg,
+        #ffd198 135deg 180deg,
+        #ffeacd 180deg 225deg,
+        #ffc78d 225deg 270deg,
+        #ffd9a8 270deg 315deg,
+        #ffe1b8 315deg 360deg
+      );
+    }
+
+    .roulette-label {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-origin: 0 0;
+      font-size: 11px;
+      font-weight: 700;
+      color: #6d3c18;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .roulette-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .roulette button {
+      width: 100%;
+      border: 1px solid #d8b58b;
+      background: linear-gradient(180deg, #fff3df, #ffe3bd);
+      color: #744216;
+      border-radius: 10px;
+      padding: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .roulette button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .roulette-result {
+      margin-top: 8px;
+      min-height: 20px;
+      font-weight: 700;
+      color: #8b3e00;
+    }
+
+    .roulette-note {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
     .event {
       margin-top: 10px;
       min-height: 24px;
@@ -350,6 +450,28 @@
       </div>
       <button id="croissantButton" aria-label="Испечь круассан">🥐 Испечь круассан</button>
       <p class="hint">Прогресс сохраняется автоматически в браузере.</p>
+      <div class="roulette">
+        <div class="roulette-head">
+          <span>Цена участия:</span>
+          <strong><span id="rouletteCost">0</span> 🥐</strong>
+        </div>
+        <div class="roulette-wheel-wrap">
+          <div class="roulette-pointer" aria-hidden="true"></div>
+          <div class="roulette-wheel" id="rouletteWheel" aria-hidden="true">
+            <span class="roulette-label" style="transform: rotate(-67.5deg) translate(0, -88px) rotate(67.5deg);">+1 🏪</span>
+            <span class="roulette-label" style="transform: rotate(-22.5deg) translate(0, -88px) rotate(22.5deg);">+1 🧈</span>
+            <span class="roulette-label" style="transform: rotate(22.5deg) translate(0, -88px) rotate(-22.5deg);">🔁</span>
+            <span class="roulette-label" style="transform: rotate(67.5deg) translate(0, -88px) rotate(-67.5deg);">+1 🔥</span>
+            <span class="roulette-label" style="transform: rotate(112.5deg) translate(0, -88px) rotate(-112.5deg);">УВЫ</span>
+            <span class="roulette-label" style="transform: rotate(157.5deg) translate(0, -88px) rotate(-157.5deg);">+1 🍽️</span>
+            <span class="roulette-label" style="transform: rotate(202.5deg) translate(0, -88px) rotate(-202.5deg);">🔁</span>
+            <span class="roulette-label" style="transform: rotate(247.5deg) translate(0, -88px) rotate(-247.5deg);">+1 ⭐</span>
+          </div>
+        </div>
+        <button id="spinRoulette">🎯 Крутить рулетку</button>
+        <div class="roulette-result" id="rouletteResult"></div>
+        <p class="roulette-note">Испытай свою удачу</p>
+      </div>
       <p class="event" id="eventStatus"></p>
     </section>
  
@@ -412,7 +534,7 @@
   <div class="belt-wrap" aria-label="Лента круассанов">
     <div class="belt-track" id="beltTrack"></div>
   </div>
-  <div class="version">Croissant Clicker v1.5.1</div>
+  <div class="version">Croissant Clicker v1.6</div>
   <script src="script.js"></script>
 </body>
 </html>
