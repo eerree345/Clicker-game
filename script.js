@@ -32,6 +32,12 @@ const defaultState = {
     factory: 0,
     airport: 0,
   },
+  prestige: {
+    oven: 0,
+    bakery: 0,
+    butter: 0,
+    restaurant: 0,
+  },
 };
 
 let state = loadState();
@@ -315,6 +321,28 @@ function canPrestige(type) {
   if (type === 'chef') return state.chefs >= 10;
   if (type === 'factory') return state.factories >= 10;
   return state.airports >= 10;
+}
+
+function branchMultiplier(type) {
+  return 1 + (state.prestige[type] || 0) * 0.03;
+}
+
+function canPrestige(type) {
+  if (type === 'oven') return state.ovens >= 10;
+  if (type === 'bakery') return state.bakeries >= 10;
+  if (type === 'butter') return state.butter >= 10;
+  return state.restaurants >= 10;
+}
+
+function branchMultiplier(type) {
+  return 1 + (state.prestige[type] || 0) * 0.03;
+}
+
+function canPrestige(type) {
+  if (type === 'oven') return state.ovens >= 10;
+  if (type === 'bakery') return state.bakeries >= 10;
+  if (type === 'butter') return state.butter >= 10;
+  return state.restaurants >= 10;
 }
 
 function branchMultiplier(type) {
