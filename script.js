@@ -249,6 +249,17 @@ function branchMultiplier(type) {
   return 1 + (state.prestige[type] || 0) * 0.03;
 }
 
+function canPrestige(type) {
+  if (type === 'oven') return state.ovens >= 10;
+  if (type === 'bakery') return state.bakeries >= 10;
+  if (type === 'butter') return state.butter >= 10;
+  return state.restaurants >= 10;
+}
+
+function branchMultiplier(type) {
+  return 1 + (state.prestige[type] || 0) * 0.03;
+}
+
 function perSecond() {
   const ovensIncome = state.ovens * 1 * branchMultiplier('oven');
   const bakeryIncome = state.bakeries * 5 * branchMultiplier('bakery');
