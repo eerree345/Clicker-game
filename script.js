@@ -194,6 +194,21 @@ function updateAchievement(levelNode, progressNode, owned) {
   progressNode.textContent = `${progress}/10`;
 }
 
+function refreshAchievements() {
+  updateAchievement(refs.ovenAchLevel, refs.ovenAchProgress, state.ovens);
+  updateAchievement(refs.bakeryAchLevel, refs.bakeryAchProgress, state.bakeries);
+  updateAchievement(refs.butterAchLevel, refs.butterAchProgress, state.butter);
+  updateAchievement(refs.restaurantAchLevel, refs.restaurantAchProgress, state.restaurants);
+}
+
+function updateAchievement(levelNode, progressNode, owned) {
+  if (!levelNode || !progressNode) return;
+  const level = Math.floor(owned / 10);
+  const progress = owned % 10;
+  levelNode.textContent = `${level}`;
+  progressNode.textContent = `${progress}/10`;
+}
+
 function format(value) {
   return new Intl.NumberFormat('ru-RU').format(Math.floor(value));
 }
