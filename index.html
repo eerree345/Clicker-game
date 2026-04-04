@@ -341,6 +341,36 @@
 
     .talent-modal.open { display: flex; }
 
+    .recipe-offer {
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 90;
+      background: rgba(255, 248, 234, 0.95);
+      border: 1px solid #e1c29a;
+      border-radius: 12px;
+      padding: 10px;
+      width: min(320px, calc(100vw - 28px));
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      font-size: 13px;
+    }
+
+    .recipe-offer button {
+      margin-top: 8px;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #c89f72;
+      background: #ffefda;
+      padding: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .recipe-offer button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
     .talent-card {
       width: min(760px, 100%);
       max-height: 86vh;
@@ -360,17 +390,24 @@
       margin-bottom: 10px;
     }
 
-    .talent-grid {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    .talent-graph {
+      position: relative;
+      min-height: 360px;
+      border: 1px dashed #e4c9aa;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #fffefc, #fff8ef);
+      padding: 12px;
+      overflow: hidden;
     }
 
     .talent-node {
+      position: absolute;
+      width: min(230px, 46%);
       border: 1px solid #e5cdb0;
       border-radius: 12px;
       background: #fff;
       padding: 10px;
+      z-index: 2;
     }
 
     .talent-node button {
@@ -387,6 +424,44 @@
     .talent-node button:disabled {
       opacity: .5;
       cursor: not-allowed;
+    }
+
+    .talent-node.core {
+      left: 50%;
+      top: 20px;
+      transform: translateX(-50%);
+    }
+
+    .talent-node.passive {
+      left: 16px;
+      bottom: 16px;
+    }
+
+    .talent-node.click {
+      right: 16px;
+      bottom: 16px;
+    }
+
+    .talent-link {
+      position: absolute;
+      height: 2px;
+      background: #cfac80;
+      transform-origin: left center;
+      z-index: 1;
+    }
+
+    .talent-link.left {
+      width: 33%;
+      left: 26%;
+      top: 48%;
+      transform: rotate(24deg);
+    }
+
+    .talent-link.right {
+      width: 33%;
+      right: 26%;
+      top: 48%;
+      transform: rotate(-24deg);
     }
 
     .rain-layer {
@@ -521,6 +596,12 @@
   </style>
 </head>
 <body>
+  <div class="recipe-offer" id="recipeOffer">
+    <b>Разовая акция для всех</b>
+    <div>10 рецептов за 10 000 круассанов</div>
+    <button id="buyRecipeOffer">Купить акцию</button>
+  </div>
+
   <div class="bg-plate" aria-hidden="true">
     <div class="plate">
       <span class="plate-croissant">🥐</span>
@@ -564,7 +645,7 @@
         <div class="roulette-result" id="rouletteResult"></div>
         <p class="roulette-note">Испытай свою удачу</p>
       </div>
-      <button class="talent-open-btn" id="openTalentTree">🌿 Дерево талантов</button>
+      <button class="talent-open-btn" id="openTalentTree">Дерево талантов</button>
       <p class="event" id="eventStatus"></p>
     </section>
  
@@ -674,7 +755,7 @@
   <div class="talent-modal" id="talentModal" role="dialog" aria-modal="true" aria-label="Дерево талантов">
     <div class="talent-card">
       <div class="talent-head">
-        <h2> Дерево талантов</h2>
+        <h2>Дерево талантов</h2>
         <button id="closeTalentTree">✕</button>
       </div>
       <p><strong>Рецепты:</strong> <span id="recipesCount">0</span></p>
@@ -685,22 +766,25 @@
       </div>
 
       <div id="talentUnlocked" style="display:none;">
-        <div class="talent-grid">
-          <div class="talent-node">
+        <div class="talent-graph">
+          <div class="talent-link left" aria-hidden="true"></div>
+          <div class="talent-link right" aria-hidden="true"></div>
+
+          <div class="talent-node core">
             <b>База мастерства</b>
             <div>Уровень: <span id="talentCoreLevel">0</span></div>
             <small>+1% ко всем доходам за уровень</small>
             <button id="upgradeTalentCore">Улучшить (1 рецепт)</button>
           </div>
 
-          <div class="talent-node">
+          <div class="talent-node passive">
             <b>Ветка: Пассив</b>
             <div>Уровень: <span id="talentPassiveLevel">0</span></div>
             <small>+3% к пассивному доходу</small>
             <button id="upgradeTalentPassive">Улучшить (2 рецепта)</button>
           </div>
 
-          <div class="talent-node">
+          <div class="talent-node click">
             <b>Ветка: Клик</b>
             <div>Уровень: <span id="talentClickLevel">0</span></div>
             <small>+10% к доходу клика</small>
@@ -710,7 +794,7 @@
       </div>
     </div>
   </div>
-  <div class="version">Croissant Clicker v1.7</div>
+  <div class="version">Croissant Clicker v1.8</div>
   <script src="script.js"></script>
 </body>
 </html>

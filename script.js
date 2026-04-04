@@ -15,6 +15,7 @@ const BRANCH_CONFIG = {
 const defaultState = {
   croissants: 0,
   recipes: 1,
+  recipeOfferClaimed: false,
   talentUnlocked: false,
   talents: {
     core: 0,
@@ -63,6 +64,8 @@ const refs = {
   perSecond: document.getElementById('perSecond'),
   button: document.getElementById('croissantButton'),
   openTalentTree: document.getElementById('openTalentTree'),
+  recipeOffer: document.getElementById('recipeOffer'),
+  buyRecipeOffer: document.getElementById('buyRecipeOffer'),
   talentModal: document.getElementById('talentModal'),
   closeTalentTree: document.getElementById('closeTalentTree'),
   unlockTalentTree: document.getElementById('unlockTalentTree'),
@@ -168,6 +171,7 @@ BRANCH_KEYS.forEach((branch) => {
   branchUI[branch].prestigeBtn.addEventListener('click', () => prestigeBranch(branch));
 });
 refs.openTalentTree.addEventListener('click', openTalentTree);
+refs.buyRecipeOffer.addEventListener('click', buyRecipeOffer);
 refs.closeTalentTree.addEventListener('click', closeTalentTree);
 refs.unlockTalentTree.addEventListener('click', unlockTalentTree);
 refs.upgradeTalentCore.addEventListener('click', () => upgradeTalent('core'));
@@ -330,6 +334,16 @@ function unlockTalentTree() {
   refresh();
 }
 
+function buyRecipeOffer() {
+  if (state.recipeOfferClaimed) return;
+  const cost = 10_000;
+  if (state.croissants < cost) return;
+  state.croissants -= cost;
+  state.recipes += 10;
+  state.recipeOfferClaimed = true;
+  refresh();
+}
+
 function upgradeTalent(type) {
   if (!state.talentUnlocked) return;
   if ((type === 'passive' || type === 'click') && state.talents.core < 3) return;
@@ -390,20 +404,6 @@ function branchMultiplier(type) {
   return 1 + (state.prestige[type] || 0) * 0.03;
 }
 
-function canPrestige(type) {
-  return ownedCount(BRANCH_CONFIG[type].ownedKey) >= 10;
-}
-
-function ownedCount(key) {
-  const value = Number(state[key]);
-  if (!Number.isFinite(value)) return 0;
-  return Math.max(0, Math.floor(value));
-}
-
-function branchMultiplier(type) {
-  return 1 + (state.prestige[type] || 0) * 0.03;
-}
-
 function perSecond() {
   const talent = getTalentMultipliers();
   return BRANCH_KEYS.reduce((sum, branch) => {
@@ -441,7 +441,9 @@ function refresh() {
     branchUI[branch].prestigeBtn.disabled = !canPrestige(branch);
   });
   refs.spinRoulette.disabled = rouletteSpinning || state.croissants < rouletteCost();
-  refs.openTalentTree.textContent = `🌿 Дерево талантов (${format(state.recipes)})`;
+  refs.openTalentTree.textContent = `Дерево талантов (${format(state.recipes)})`;
+  refs.buyRecipeOffer.disabled = state.recipeOfferClaimed || state.croissants < 10_000;
+  refs.buyRecipeOffer.textContent = state.recipeOfferClaimed ? 'Акция уже куплена' : 'Купить акцию';
   refreshTalentUI();
 }
 
@@ -509,6 +511,7 @@ function sanitizeState(inputState) {
   const next = { ...inputState };
   next.croissants = sanitizeNonNegative(next.croissants);
   next.recipes = sanitizeNonNegative(next.recipes);
+  next.recipeOfferClaimed = Boolean(next.recipeOfferClaimed);
   next.talentUnlocked = Boolean(next.talentUnlocked);
   next.talents = {
     core: sanitizeNonNegative(next.talents?.core),
