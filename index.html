@@ -442,26 +442,20 @@
       bottom: 16px;
     }
 
-    .talent-link {
+    .talent-links {
       position: absolute;
-      height: 2px;
-      background: #cfac80;
-      transform-origin: left center;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       z-index: 1;
+      pointer-events: none;
     }
 
-    .talent-link.left {
-      width: 33%;
-      left: 26%;
-      top: 48%;
-      transform: rotate(24deg);
-    }
-
-    .talent-link.right {
-      width: 33%;
-      right: 26%;
-      top: 48%;
-      transform: rotate(-24deg);
+    .talent-links line {
+      stroke: #cfac80;
+      stroke-width: 3;
+      stroke-linecap: round;
+      opacity: .95;
     }
 
     .rain-layer {
@@ -743,6 +737,21 @@
           <b>✈️ Небесная Пекарская Лига — ур. <span id="airportAchLevel">0</span></b>
           <small>Аэропекарня: <span id="airportAchProgress">0/10</span></small>
         </div>
+
+        <div class="achievement">
+          <b>🎰 Колесо удачи — ур. <span id="rouletteAchLevel">0</span></b>
+          <small>Прокрутки рулетки: <span id="rouletteAchProgress">0/1</span></small>
+        </div>
+
+        <div class="achievement">
+          <b>Первое касание талантов — ур. <span id="talentTreeAchLevel">0</span></b>
+          <small>Открыть дерево талантов: <span id="talentTreeAchProgress">0/1</span></small>
+        </div>
+
+        <div class="achievement">
+          <b>📚 Коллекционер рецептов — ур. <span id="recipesSpentAchLevel">0</span></b>
+          <small>Потрачено рецептов: <span id="recipesSpentAchProgress">0/10</span></small>
+        </div>
       </details>
     </div>
   </div>
@@ -767,8 +776,10 @@
 
       <div id="talentUnlocked" style="display:none;">
         <div class="talent-graph">
-          <div class="talent-link left" aria-hidden="true"></div>
-          <div class="talent-link right" aria-hidden="true"></div>
+          <svg class="talent-links" viewBox="0 0 340 230" preserveAspectRatio="none" aria-hidden="true">
+            <line x1="170" y1="70" x2="78" y2="176"></line>
+            <line x1="170" y1="70" x2="262" y2="176"></line>
+          </svg>
 
           <div class="talent-node core">
             <b>База мастерства</b>
@@ -794,7 +805,7 @@
       </div>
     </div>
   </div>
-  <div class="version">Croissant Clicker v1.8</div>
+  <div class="version">Croissant Clicker v1.8.1</div>
   <script src="script.js"></script>
 </body>
 </html>

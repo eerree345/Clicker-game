@@ -15,6 +15,8 @@ const BRANCH_CONFIG = {
 const defaultState = {
   croissants: 0,
   recipes: 1,
+  rouletteSpins: 0,
+  recipesSpent: 0,
   recipeOfferClaimed: false,
   talentUnlocked: false,
   talents: {
@@ -138,6 +140,12 @@ const refs = {
   chefAchProgress: document.getElementById('chefAchProgress'),
   factoryAchProgress: document.getElementById('factoryAchProgress'),
   airportAchProgress: document.getElementById('airportAchProgress'),
+  rouletteAchLevel: document.getElementById('rouletteAchLevel'),
+  rouletteAchProgress: document.getElementById('rouletteAchProgress'),
+  talentTreeAchLevel: document.getElementById('talentTreeAchLevel'),
+  talentTreeAchProgress: document.getElementById('talentTreeAchProgress'),
+  recipesSpentAchLevel: document.getElementById('recipesSpentAchLevel'),
+  recipesSpentAchProgress: document.getElementById('recipesSpentAchProgress'),
   eventStatus: document.getElementById('eventStatus'),
   rainLayer: document.getElementById('rainLayer'),
   rainTimer: document.getElementById('rainTimer'),
@@ -216,6 +224,7 @@ function spinRoulette() {
   if (state.croissants < cost) return;
 
   state.croissants -= cost;
+  state.rouletteSpins += 1;
   const outcome = pickRouletteOutcome();
   const segment = pickSegmentForOutcome(outcome.kind);
   startRouletteSpin(segment, () => {
@@ -352,6 +361,7 @@ function upgradeTalent(type) {
   if (state.recipes < cost) return;
 
   state.recipes -= cost;
+  state.recipesSpent += cost;
   state.talents[type] += 1;
   refresh();
 }
@@ -452,6 +462,25 @@ function refreshAchievements() {
     const { ownedKey } = BRANCH_CONFIG[branch];
     updateAchievement(branchUI[branch].achLevel, branchUI[branch].achProgress, state[ownedKey]);
   });
+
+  updateMilestoneAchievement(
+    refs.rouletteAchLevel,
+    refs.rouletteAchProgress,
+    state.rouletteSpins,
+    [1, 5, 20],
+  );
+  updateMilestoneAchievement(
+    refs.talentTreeAchLevel,
+    refs.talentTreeAchProgress,
+    state.talentUnlocked ? 1 : 0,
+    [1],
+  );
+  updateMilestoneAchievement(
+    refs.recipesSpentAchLevel,
+    refs.recipesSpentAchProgress,
+    state.recipesSpent,
+    [10, 50, 100],
+  );
 }
 
 function updateAchievement(levelNode, progressNode, owned) {
@@ -460,6 +489,21 @@ function updateAchievement(levelNode, progressNode, owned) {
   const progress = owned % 10;
   levelNode.textContent = `${level}`;
   progressNode.textContent = `${progress}/10`;
+}
+
+function updateMilestoneAchievement(levelNode, progressNode, value, milestones) {
+  if (!levelNode || !progressNode || !Array.isArray(milestones) || milestones.length === 0) return;
+
+  const safeValue = sanitizeNonNegative(value);
+  let level = 0;
+  milestones.forEach((target) => {
+    if (safeValue >= target) level += 1;
+  });
+
+  const currentTarget = milestones[Math.min(level, milestones.length - 1)];
+  const clampedProgress = Math.min(safeValue, currentTarget);
+  levelNode.textContent = `${level}`;
+  progressNode.textContent = `${format(clampedProgress)}/${format(currentTarget)}`;
 }
 
 function format(value) {
@@ -511,6 +555,8 @@ function sanitizeState(inputState) {
   const next = { ...inputState };
   next.croissants = sanitizeNonNegative(next.croissants);
   next.recipes = sanitizeNonNegative(next.recipes);
+  next.rouletteSpins = sanitizeNonNegative(next.rouletteSpins);
+  next.recipesSpent = sanitizeNonNegative(next.recipesSpent);
   next.recipeOfferClaimed = Boolean(next.recipeOfferClaimed);
   next.talentUnlocked = Boolean(next.talentUnlocked);
   next.talents = {
