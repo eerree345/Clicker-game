@@ -85,7 +85,7 @@
       padding: 24px;
       display: grid;
       gap: 20px;
-      grid-template-columns: 1.2fr 1fr 0.95fr;
+      grid-template-columns: 1.2fr 1fr;
       position: relative;
       z-index: 1;
     }
@@ -236,14 +236,6 @@
       from { opacity: 0; transform: translate(-50%, -20%); }
       20% { opacity: 1; }
       to { opacity: 0; transform: translate(-50%, -165%); }
-    }
-
-    @keyframes rainbowFlow {
-      0% { background-position: 0% 50%; }
-      25% { background-position: 50% 0%; }
-      50% { background-position: 100% 50%; }
-      75% { background-position: 50% 100%; }
-      100% { background-position: 0% 50%; }
     }
 
     @keyframes fall {
