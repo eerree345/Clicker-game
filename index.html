@@ -131,7 +131,26 @@
     #croissantButton:active { transform: translateY(2px) scale(0.99); }
 
     .shop h2 { margin-top: 0; }
-    .achievements h2 { margin-top: 0; }
+    .achievements summary {
+      cursor: pointer;
+      font-size: 20px;
+      margin-bottom: 8px;
+      list-style: none;
+    }
+
+    .achievements summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .achievements summary::after {
+      content: '▾';
+      float: right;
+      color: var(--muted);
+    }
+
+    .achievements:not([open]) summary::after {
+      content: '▸';
+    }
 
     .upgrade {
       width: 100%;
@@ -503,8 +522,8 @@
         <button class="prestige-btn" id="prestigeRestaurant">Сбросить 10 ресторанов → +3% к ресторанам</button>
       </aside>
 
-      <aside class="panel achievements">
-        <h2>Достижения</h2>
+      <details class="panel achievements" id="achievementsMenu">
+        <summary><strong>Достижения</strong></summary>
 
         <div class="achievement">
           <b>🔥 Жар Сердца Пекаря — ур. <span id="ovenAchLevel">0</span></b>
@@ -525,7 +544,7 @@
           <b>🍽️ Корона Круассанного Двора — ур. <span id="restaurantAchLevel">0</span></b>
           <small>Ресторан: <span id="restaurantAchProgress">0/10</span></small>
         </div>
-      </aside>
+      </details>
     </div>
   </div>
 
@@ -534,7 +553,7 @@
   <div class="belt-wrap" aria-label="Лента круассанов">
     <div class="belt-track" id="beltTrack"></div>
   </div>
-  <div class="version">Croissant Clicker v1.6</div>
+  <div class="version">Croissant Clicker v1.6.1</div>
   <script src="script.js"></script>
 </body>
 </html>
