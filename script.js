@@ -390,6 +390,20 @@ function branchMultiplier(type) {
   return 1 + (state.prestige[type] || 0) * 0.03;
 }
 
+function canPrestige(type) {
+  return ownedCount(BRANCH_CONFIG[type].ownedKey) >= 10;
+}
+
+function ownedCount(key) {
+  const value = Number(state[key]);
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.floor(value));
+}
+
+function branchMultiplier(type) {
+  return 1 + (state.prestige[type] || 0) * 0.03;
+}
+
 function perSecond() {
   const talent = getTalentMultipliers();
   return BRANCH_KEYS.reduce((sum, branch) => {
