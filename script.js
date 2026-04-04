@@ -1,6 +1,5 @@
 const STORAGE_KEY = 'croissant_clicker_save_v1';
 const BELT_VISIBLE_ITEMS = 15;
-const BELT_SHIFT_INTERVAL_MS = 2000;
 
 const defaultState = {
   croissants: 0,
@@ -54,7 +53,7 @@ const refs = {
 
 refs.button.addEventListener('click', (event) => {
   state.croissants += state.perClick;
-  showClickGain(event);
+  showClickGain(event, state.perClick);
   refresh();
 });
 
@@ -269,8 +268,7 @@ function hideRainTimer() {
   refs.rainTimer.textContent = '';
 }
 
-function showClickGain(event) {
-  const gain = state.perClick;
+function showClickGain(event, gain = state.perClick) {
   const node = document.createElement('span');
   node.className = 'click-gain';
   node.textContent = `+${format(gain)}`;
@@ -287,61 +285,33 @@ function showClickGain(event) {
 function initDishBelt() {
   if (!refs.beltTrack) return;
 
-  const initialCount = BELT_VISIBLE_ITEMS + 1;
-  for (let i = 0; i < initialCount; i += 1) {
-    refs.beltTrack.appendChild(createDishNode(randomDish()));
+  const baseItems = [];
+  for (let i = 0; i < BELT_VISIBLE_ITEMS; i += 1) {
+    const node = createDishNode(randomDishType());
+    baseItems.push(node);
+    refs.beltTrack.appendChild(node);
   }
+
+  baseItems.forEach((node) => {
+    refs.beltTrack.appendChild(node.cloneNode(true));
+  });
 
   refs.beltTrack.addEventListener('click', onBeltClick);
-  setInterval(shiftDishBelt, BELT_SHIFT_INTERVAL_MS);
 }
 
-function shiftDishBelt() {
-  if (!refs.beltTrack) return;
-  const slotWidth = refs.beltTrack.firstElementChild?.getBoundingClientRect().width;
-  if (!slotWidth) return;
-
-  refs.beltTrack.style.transition = 'transform 650ms linear';
-  refs.beltTrack.style.transform = `translateX(-${slotWidth}px)`;
-
-  setTimeout(() => {
-    refs.beltTrack.style.transition = 'none';
-    refs.beltTrack.style.transform = 'translateX(0)';
-    refs.beltTrack.firstElementChild?.remove();
-    refs.beltTrack.appendChild(createDishNode(randomDish()));
-  }, 670);
+function randomDishType() {
+  return Math.random() < 0.15 ? 'pizza' : 'croissant';
 }
 
-function randomDish() {
-  const pizzaChance = 0.1;
-  if (Math.random() < pizzaChance) {
-    return { kind: 'pizza', icon: '🍕', label: 'кусочек пиццы' };
-  }
-
-  const croissants = [
-    { icon: '🥐', label: 'классический' },
-    { icon: '🥐', label: 'клубничная помадка' },
-    { icon: '🥐', label: 'шоколадная крошка' },
-    { icon: '🥐', label: 'фисташки' },
-  ];
-
-  const index = randomInt(0, croissants.length - 1);
-  return { kind: 'croissant', ...croissants[index] };
-}
-
-function createDishNode(dish) {
-  const node = document.createElement('button');
-  node.type = 'button';
+function createDishNode(type) {
+  const node = document.createElement('span');
   node.className = 'belt-item';
-  node.setAttribute('aria-label', dish.label);
-  node.dataset.kind = dish.kind;
-  node.innerHTML = `<span>${dish.icon}</span><span class="sprinkle">${dish.label}</span>`;
-
-  if (dish.kind === 'pizza') {
+  node.setAttribute('aria-hidden', 'true');
+  node.dataset.kind = type;
+  node.textContent = type === 'pizza' ? '🍕' : '🥐';
+  if (type === 'pizza') {
     node.classList.add('is-pizza');
-    node.title = 'Кликни и получи +1000 круассанов!';
   }
-
   return node;
 }
 
@@ -350,14 +320,7 @@ function onBeltClick(event) {
   if (!dishNode || dishNode.dataset.kind !== 'pizza') return;
 
   state.croissants += 1000;
-  refs.eventStatus.textContent = '🍕 Бонус! +1000 круассанов за кусочек пиццы.';
-  setTimeout(() => {
-    if (refs.eventStatus.textContent.includes('Бонус! +1000')) {
-      refs.eventStatus.textContent = '';
-    }
-  }, 1600);
-
-  const replacement = createDishNode(randomDish());
-  dishNode.replaceWith(replacement);
+  showClickGain(event, 1000);
+  dishNode.replaceWith(createDishNode('croissant'));
   refresh();
 }
