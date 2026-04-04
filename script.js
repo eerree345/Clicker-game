@@ -1,5 +1,6 @@
 const STORAGE_KEY = 'croissant_clicker_save_v1';
 const BELT_VISIBLE_ITEMS = 15;
+const BRANCH_KEYS = ['oven', 'bakery', 'butter', 'restaurant', 'cart', 'chef', 'factory', 'airport'];
 
 const defaultState = {
   croissants: 0,
@@ -31,12 +32,6 @@ const defaultState = {
     chef: 0,
     factory: 0,
     airport: 0,
-  },
-  prestige: {
-    oven: 0,
-    bakery: 0,
-    butter: 0,
-    restaurant: 0,
   },
 };
 
@@ -296,6 +291,35 @@ function applyRouletteOutcome(outcome) {
 function prestigeBranch(type) {
   if (!canPrestige(type)) return;
 
+  if (type === 'oven') state.ovens = Math.max(0, state.ovens - 10);
+  if (type === 'bakery') state.bakeries = Math.max(0, state.bakeries - 10);
+  if (type === 'butter') {
+    state.butter = Math.max(0, state.butter - 10);
+    state.perClick = Math.max(1, state.perClick - 10);
+  }
+  if (type === 'restaurant') state.restaurants = Math.max(0, state.restaurants - 10);
+  if (type === 'cart') state.carts = Math.max(0, state.carts - 10);
+  if (type === 'chef') state.chefs = Math.max(0, state.chefs - 10);
+  if (type === 'factory') state.factories = Math.max(0, state.factories - 10);
+  if (type === 'airport') state.airports = Math.max(0, state.airports - 10);
+
+  state.prestige[type] += 1;
+  refresh();
+
+  setTimeout(() => {
+    rouletteSpinning = false;
+    onDone();
+  }, spinDuration + 50);
+}
+
+function applyRouletteOutcome(outcome) {
+  outcome.apply();
+  refs.rouletteResult.textContent = outcome.message;
+}
+
+function prestigeBranch(type) {
+  if (!canPrestige(type)) return;
+
   if (type === 'oven') state.ovens -= 10;
   if (type === 'bakery') state.bakeries -= 10;
   if (type === 'butter') {
@@ -343,6 +367,27 @@ function canPrestige(type) {
   if (type === 'bakery') return state.bakeries >= 10;
   if (type === 'butter') return state.butter >= 10;
   return state.restaurants >= 10;
+}
+
+function branchMultiplier(type) {
+  return 1 + (state.prestige[type] || 0) * 0.03;
+}
+
+function canPrestige(type) {
+  if (type === 'oven') return ownedCount('ovens') >= 10;
+  if (type === 'bakery') return ownedCount('bakeries') >= 10;
+  if (type === 'butter') return ownedCount('butter') >= 10;
+  if (type === 'restaurant') return ownedCount('restaurants') >= 10;
+  if (type === 'cart') return ownedCount('carts') >= 10;
+  if (type === 'chef') return ownedCount('chefs') >= 10;
+  if (type === 'factory') return ownedCount('factories') >= 10;
+  return ownedCount('airports') >= 10;
+}
+
+function ownedCount(key) {
+  const value = Number(state[key]);
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.floor(value));
 }
 
 function branchMultiplier(type) {
@@ -459,7 +504,7 @@ function loadState() {
     if (!raw) return structuredClone(defaultState);
 
     const parsed = JSON.parse(raw);
-    return {
+    const merged = {
       ...structuredClone(defaultState),
       ...parsed,
       prices: {
@@ -471,9 +516,43 @@ function loadState() {
         ...(parsed.prestige || {}),
       },
     };
+    return sanitizeState(merged);
   } catch {
-    return structuredClone(defaultState);
+    return sanitizeState(structuredClone(defaultState));
   }
+}
+
+function sanitizeState(inputState) {
+  const next = { ...inputState };
+  next.croissants = sanitizeNonNegative(next.croissants);
+  next.perClick = Math.max(1, sanitizeNonNegative(next.perClick));
+
+  next.ovens = sanitizeNonNegative(next.ovens);
+  next.bakeries = sanitizeNonNegative(next.bakeries);
+  next.butter = sanitizeNonNegative(next.butter);
+  next.restaurants = sanitizeNonNegative(next.restaurants);
+  next.carts = sanitizeNonNegative(next.carts);
+  next.chefs = sanitizeNonNegative(next.chefs);
+  next.factories = sanitizeNonNegative(next.factories);
+  next.airports = sanitizeNonNegative(next.airports);
+
+  next.prices = { ...next.prices };
+  BRANCH_KEYS.forEach((key) => {
+    next.prices[key] = Math.max(1, sanitizeNonNegative(next.prices[key]));
+  });
+
+  next.prestige = { ...next.prestige };
+  BRANCH_KEYS.forEach((key) => {
+    next.prestige[key] = sanitizeNonNegative(next.prestige[key]);
+  });
+
+  return next;
+}
+
+function sanitizeNonNegative(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) return 0;
+  return number;
 }
 
 function scheduleCroissantRain() {
